@@ -1,15 +1,18 @@
 package com.example.brimonotification.activity;
 
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.view.MenuItem;
 import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.example.brimonotification.R;
 import com.example.brimonotification.servic.NotifyService;
 import com.example.brimonotification.databinding.ActivityMainBinding;
 
@@ -24,10 +27,30 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         initClick();
+        initToolbar();
     }
+
+    private void initToolbar() {
+        try {
+            PackageInfo info = getPackageManager().
+                    getPackageInfo(getPackageName(), 0);
+            binding.toolbar.setTitle(String.format("%s v%s", getString(R.string.app_name), info.versionCode));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private boolean OnMenu(MenuItem menuItem) {
+        if (menuItem.getItemId() == R.id.bill) {
+            startActivity(new Intent(this, BillActivity.class));
+        }
+        return false;
+    }
+
 
     private void initClick() {
         binding.notify.setOnClickListener(this::ClickNotify);
+        binding.toolbar.setOnMenuItemClickListener(this::OnMenu);
     }
 
     private void ClickNotify(View view) {

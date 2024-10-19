@@ -90,10 +90,14 @@ public class NotifyService extends NotificationListenerService implements Handle
         values.put("noticeTime", notificationBean.getNoticeTime());
         values.put("originalText", notificationBean.getOriginalText());
         values.put("time", notificationBean.getTime());
-        long id = helper.instData("notification", values);
-        PostDataRunnable postDataRunnable = new PostDataRunnable(notificationBean, id);
-        postDataRunnable.setOnMessage(this::onMessage);
-        new Thread(postDataRunnable).start();
+
+        if (helper.isEmpty("SELECT * FROM log WHERE originalText=? ",
+                new String[]{notificationBean.getOriginalText()})) {
+            long id = helper.instData("notification", values);
+            PostDataRunnable postDataRunnable = new PostDataRunnable(notificationBean, id);
+            postDataRunnable.setOnMessage(this::onMessage);
+            new Thread(postDataRunnable).start();
+        }
     }
 
     private void onMessage(String msg, long id) {

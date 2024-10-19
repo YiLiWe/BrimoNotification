@@ -41,6 +41,8 @@ public class MyDBOpenHelper extends SQLiteOpenHelper {
         return writ.update(tab, values, whereClause, whereArgs);
     }
 
+
+
     public long instData(String tab, ContentValues contentValues) {
         try {
             SQLiteDatabase writ = getWritableDatabase();
