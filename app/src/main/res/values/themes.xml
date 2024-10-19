@@ -13,6 +13,7 @@
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <item name="android:actionBarStyle">@style/toolbar</item>
         <item name="actionMenuTextColor">@color/white</item>
+        <item name="android:windowBackground">@color/windowBackground</item>
         <!-- Customize your theme here. -->
     </style>
 
