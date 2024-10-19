@@ -39,6 +39,7 @@ public class BillActivity extends AppCompatActivity  {
         initRecycler();
         initToolbar();
         initSmart();
+        initData();
     }
 
     private void initRecycler() {
