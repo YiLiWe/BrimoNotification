@@ -83,7 +83,14 @@ public class NotifyService extends NotificationListenerService implements Handle
         appText("\n");
         notificationBean.setOriginalText(msgContent);
         notificationBean.setNoticeTime(time);
-        long id = helper.instData("notification", notificationBean);
+        ContentValues values = new ContentValues();
+        values.put("amount", notificationBean.getAmount());
+        values.put("payerName", notificationBean.getPayerName());
+        values.put("account", notificationBean.getAccount());
+        values.put("noticeTime", notificationBean.getNoticeTime());
+        values.put("originalText", notificationBean.getOriginalText());
+        values.put("time", notificationBean.getTime());
+        long id = helper.instData("notification", values);
         PostDataRunnable postDataRunnable = new PostDataRunnable(notificationBean, id);
         postDataRunnable.setOnMessage(this::onMessage);
         new Thread(postDataRunnable).start();

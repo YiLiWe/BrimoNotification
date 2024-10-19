@@ -41,22 +41,9 @@ public class MyDBOpenHelper extends SQLiteOpenHelper {
         return writ.update(tab, values, whereClause, whereArgs);
     }
 
-    public long instData(String tab, Object o) {
+    public long instData(String tab, ContentValues contentValues) {
         try {
             SQLiteDatabase writ = getWritableDatabase();
-            Class<?> mClass = o.getClass();
-            Field[] fields = mClass.getFields();
-            ContentValues contentValues = new ContentValues();
-            for (Field field : fields) {
-                String key = field.getName();
-                field.setAccessible(true);
-                Object object = field.get(o);
-                if (object instanceof String text) {
-                    contentValues.put(key, text);
-                } else if (object instanceof Integer integer) {
-                    contentValues.put(key, integer);
-                }
-            }
             return writ.insert(tab, null, contentValues);
         } catch (Exception e) {
             return -1;
