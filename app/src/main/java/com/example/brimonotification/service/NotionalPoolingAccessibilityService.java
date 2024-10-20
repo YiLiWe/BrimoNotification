@@ -22,12 +22,23 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
     private final String pass = "Coc135689";
 
     @Override
+    protected void onServiceConnected() {
+        super.onServiceConnected();
+        Log.d("详细", "启动");
+    }
+
+    @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         AccessibilityNodeInfo nodeInfo = getRootInActiveWindow();
         if (nodeInfo == null) return;
         handleLogin(nodeInfo);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("详细", "关闭");
+    }
 
     /**
      * 处理登录
@@ -75,6 +86,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
     private void ClickNodeInfo(AccessibilityNodeInfo nodeInfo, String id) {
         List<AccessibilityNodeInfo> logins = nodeInfo.findAccessibilityNodeInfosByViewId(id);
         for (AccessibilityNodeInfo login : logins) {
+            Log.d("点击", "登录");
             login.performAction(AccessibilityNodeInfo.ACTION_CLICK);
         }
     }
