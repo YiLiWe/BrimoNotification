@@ -31,7 +31,16 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
         AccessibilityNodeInfo nodeInfo = getRootInActiveWindow();
         if (nodeInfo == null) return;
         handleLogin(nodeInfo);
+        handlerData(nodeInfo);
     }
+    private void handlerData(AccessibilityNodeInfo nodeInfo) {
+        List<AccessibilityNodeInfo> nodeInfos = new ArrayList<>();
+        AccessibilityUtils.getAccessibilityNodeInfoS(nodeInfos, nodeInfo);
+        for (AccessibilityNodeInfo nodeInfo1 : nodeInfos) {
+            Log.d("控件信息", nodeInfo1.toString());
+        }
+    }
+
 
     @Override
     public void onDestroy() {
