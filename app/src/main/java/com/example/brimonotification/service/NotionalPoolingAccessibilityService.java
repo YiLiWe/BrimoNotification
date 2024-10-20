@@ -46,6 +46,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
      * @param nodeInfo
      */
     private void handleLogin(AccessibilityNodeInfo nodeInfo) {
+        Log.d("详细", nodeInfo.toString());
         //点击首页登录
         ClickNodeInfo(nodeInfo, "id.co.bri.brimo:id/btn_login");
         EditNodeInfo(nodeInfo, "id.co.bri.brimo:id/et_password", pass);
