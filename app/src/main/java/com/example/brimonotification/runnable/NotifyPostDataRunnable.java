@@ -10,7 +10,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 @Data
-public class PostDataRunnable implements Runnable {
+public class NotifyPostDataRunnable implements Runnable {
     private final NotificationBean bean;
     private final long id;
     private String BASE_URL = "https://admin.tynpay.site/app/confirmReceiptSuccess?amount=%s&payerName=%s";

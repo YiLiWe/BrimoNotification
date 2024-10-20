@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 
 import com.example.brimonotification.bean.NotificationBean;
 import com.example.brimonotification.helper.MyDBOpenHelper;
-import com.example.brimonotification.runnable.PostDataRunnable;
+import com.example.brimonotification.runnable.NotifyPostDataRunnable;
 import com.example.brimonotification.window.NotifyWindow;
 
 import java.sql.Date;
@@ -94,7 +94,7 @@ public class NotifyService extends NotificationListenerService implements Handle
         if (helper.isEmpty("SELECT * FROM notification WHERE originalText=?",
                 new String[]{notificationBean.getOriginalText()})) {
             long id = helper.instData("notification", values);
-            PostDataRunnable postDataRunnable = new PostDataRunnable(notificationBean, id);
+            NotifyPostDataRunnable postDataRunnable = new NotifyPostDataRunnable(notificationBean, id);
             postDataRunnable.setOnMessage(this::onMessage);
             new Thread(postDataRunnable).start();
         }

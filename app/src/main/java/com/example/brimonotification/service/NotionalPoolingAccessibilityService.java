@@ -1,28 +1,72 @@
 package com.example.brimonotification.service;
 
 import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.GestureDescription;
+import android.graphics.Path;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import androidx.annotation.NonNull;
+
+import com.example.brimonotification.bean.NotionalPoolingBean;
+import com.example.brimonotification.runnable.NotionalPoolingDataRunnable;
+
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 自动归集
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class NotionalPoolingAccessibilityService extends AccessibilityService {
-    //2024-10-20 08:41:43.532 20051-20051 控件信息                    com.example.brimonotification        D  android.view.accessibility.AccessibilityNodeInfo@5f4ff; boundsInParent: Rect(0, 0 - 656, 96); boundsInScreen: Rect(32, 1261 - 688, 1357); boundsInWindow: Rect(32, 1261 - 688, 1357); packageName: id.co.bri.brimo; className: android.widget.EditText; text: Password; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; containerTitle: null; viewIdResName: id.co.bri.brimo:id/et_password; uniqueId: null; checkable: false; checked: false; focusable: true; focused: false; selected: false; clickable: true; longClickable: true; contextClickable: false; enabled: true; password: true; scrollable: false; importantForAccessibility: true; visible: true; actions: [AccessibilityAction: ACTION_FOCUS - null, AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_CLICK - null, AccessibilityAction: ACTION_LONG_CLICK - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SET_TEXT - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
-    //2024-10-20 08:41:43.535 20051-20051 控件信息                    com.example.brimonotification        D  android.view.accessibility.AccessibilityNodeInfo@616c8; boundsInParent: Rect(0, 0 - 656, 96); boundsInScreen: Rect(32, 1405 - 688, 1501); boundsInWindow: Rect(32, 1405 - 688, 1501); packageName: id.co.bri.brimo; className: android.widget.Button; text: Login; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; containerTitle: null; viewIdResName: id.co.bri.brimo:id/button_login; uniqueId: null; checkable: false; checked: false; focusable: true; focused: false; selected: false; clickable: true; longClickable: false; contextClickable: false; enabled: false; password: false; scrollable: false; importantForAccessibility: true; visible: true; actions: [AccessibilityAction: ACTION_FOCUS - null, AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_NEXT_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_SET_SELECTION - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
-    //id.co.bri.brimo:id/btn_login
-
     private static final String TAG = "NotionalPoolingAccessibilityService";
-    private final String pass = "Coc135689";
+    private final String pass = "Coc135689";//登录密码
+    private String amount = "0";//余额
+    private NotionalPoolingBean poolingBean;//转账信息
+    private final Handler handler = new Handler(Looper.getMainLooper());//自动刷新
+    private boolean isRun = true; // Ensures thread-safe access
+
+    private final long NotionalPoolingTimeMAX = 10_000;//获取归集数据集间隔
+    private final long POST_DELAY_MS = 20_000, GESTURE_DURATION_MS = 1000; // Delay for posting logs
 
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
-        Log.d("详细", "启动");
+        print("服务启动");
+        startData();
+    }
+
+    private void print(String msg) {
+        Log.d(TAG, msg);
+    }
+
+    @Data
+    private class NotionalPooling implements Runnable {
+        public final NotionalPoolingAccessibilityService service;
+
+        @Override
+        public void run() {
+            if (poolingBean == null && !amount.equals("0")) {//判断数据，金额不为0，才执行
+                print("请求归集数据");
+                new Thread(new NotionalPoolingDataRunnable(service)).start();
+            }
+            handler.postDelayed(this, NotionalPoolingTimeMAX);
+        }
+    }
+
+    private void startData() {
+        handler.postDelayed(new NotionalPooling(this), NotionalPoolingTimeMAX);
+        handler.postDelayed(this::simulateSwipeUp, POST_DELAY_MS);
     }
 
     @Override
@@ -30,14 +74,163 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
         AccessibilityNodeInfo nodeInfo = getRootInActiveWindow();
         if (nodeInfo == null) return;
         handleLogin(nodeInfo);
+        handleAmount(nodeInfo);
+        handleTransfer(nodeInfo);
+    }
 
+    /**
+     * 处理转账转账
+     *
+     * @param nodeInfo
+     */
+    private void handleTransfer(AccessibilityNodeInfo nodeInfo) {
+        if (poolingBean == null) return;
+        ClickTransfer(nodeInfo);//首页
+        ClickTambahPenerimaBaru(nodeInfo);
+        if (!nodeInfo.findAccessibilityNodeInfosByText("Penerima Baru").isEmpty()) {//输入账号信息
+            ClickSelectBank(nodeInfo);
+        } else if (!nodeInfo.findAccessibilityNodeInfosByText("Masukkan Nominal").isEmpty()) {//输入金额
+            editNominal(nodeInfo);
+        }
+    }
+
+    /**
+     * 输入金额
+     *
+     * @param nodeInfo
+     */
+    private void editNominal(AccessibilityNodeInfo nodeInfo) {
+        List<AccessibilityNodeInfo> nodeInfos = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/et_nominal");
+        for (AccessibilityNodeInfo bank : nodeInfos) {
+            if (bank.getText() == null) continue;
+            String text = bank.getText().toString();
+            if (!text.equals(poolingBean.getAmount())) {//输入金额
+                editText(bank, poolingBean.getAmount());
+            } else {//确认转账
+                ClickLanjut(nodeInfo);
+            }
+        }
+    }
+
+    /**
+     * 选择银行
+     *
+     * @param nodeInfo
+     */
+    private void ClickSelectBank(AccessibilityNodeInfo nodeInfo) {
+        List<AccessibilityNodeInfo> nodeInfos = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/et_bank");
+        for (AccessibilityNodeInfo bank : nodeInfos) {
+            if (bank.getText() == null) continue;
+            String text = bank.getText().toString();
+            if (!text.contains(poolingBean.getBank())) {//不存在则点击选择
+                bank.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+            } else {//输入银行卡
+                editAccount(nodeInfo);
+            }
+        }
+        //上面点击，以后输入银行
+        editBank(nodeInfo);
+    }
+
+    /**
+     * 输入银行卡
+     *
+     * @param nodeInfo
+     */
+    private void editAccount(AccessibilityNodeInfo nodeInfo) {
+        List<AccessibilityNodeInfo> nodeInfos = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/et_norek");
+        for (AccessibilityNodeInfo nodeInfo1 : nodeInfos) {
+            if (nodeInfo1.getText() == null) continue;
+            String text = nodeInfo1.getText().toString();
+            if (!text.equals(poolingBean.getAccount())) {//未输入银行号
+                editText(nodeInfo1, poolingBean.getAccount());
+            } else {//以输入银行卡
+                ClickLanjut(nodeInfo);
+            }
+        }
+    }
+
+    /**
+     * 确认信息
+     *
+     * @param nodeInfo
+     */
+    private void ClickLanjut(AccessibilityNodeInfo nodeInfo) {
+        ClickNodeInfo(nodeInfo, "id.co.bri.brimo:id/btn_lanjut");
+    }
+
+    /**
+     * 输入银行
+     *
+     * @param nodeInfo
+     */
+    private void editBank(AccessibilityNodeInfo nodeInfo) {
+        List<AccessibilityNodeInfo> searchView = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/searchView");
+        for (AccessibilityNodeInfo search : searchView) {
+            if (search.getText() == null) continue;
+            String text = search.getText().toString();
+            if (text.contains(poolingBean.getBank())) {//存在则选择
+                optionBank(nodeInfo);
+            } else {
+                editText(search, poolingBean.getBank());
+            }
+        }
+    }
+
+    /**
+     * 选择框，选择
+     *
+     * @param nodeInfo
+     */
+    private void optionBank(AccessibilityNodeInfo nodeInfo) {
+        List<AccessibilityNodeInfo> option_bank = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/tv_option_name");
+        for (AccessibilityNodeInfo bank : option_bank) {
+            if (bank.getText() == null) continue;
+            String text = bank.getText().toString();
+            if (text.contains(poolingBean.getBank())) {//不存在则点击选择
+                boolean is = bank.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                print(String.format("选择银行:%s|选择状态:%s", text, is));
+            }
+        }
+    }
+
+    /**
+     * 点击进入转账
+     *
+     * @param nodeInfo
+     */
+    private void ClickTambahPenerimaBaru(AccessibilityNodeInfo nodeInfo) {
+        ClickNodeInfo(nodeInfo, "id.co.bri.brimo:id/btnSubmit");
+    }
+
+    /**
+     * 点击转账
+     *
+     * @param nodeInfo
+     */
+    private void ClickTransfer(AccessibilityNodeInfo nodeInfo) {
+        List<AccessibilityNodeInfo> transfers = nodeInfo.findAccessibilityNodeInfosByText("Transfer");
+        for (AccessibilityNodeInfo transfer : transfers) {
+            if (transfer.getViewIdResourceName() == null) continue;
+            if (transfer.getViewIdResourceName().equals("id.co.bri.brimo:id/namaMenu")) {
+                AccessibilityNodeInfo parent = transfer.getParent();
+                parent.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+            }
+        }
     }
 
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d("详细", "关闭");
+    /**
+     * 获取余额
+     *
+     * @param nodeInfo
+     */
+    private void handleAmount(AccessibilityNodeInfo nodeInfo) {
+        String text = getText(nodeInfo, "id.co.bri.brimo:id/total_saldo_ib");
+        if (text == null) return;
+        if (text.startsWith("Rp")) {
+            amount = getInteger(text);
+        }
     }
 
     /**
@@ -53,20 +246,59 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
     }
 
     /**
+     * 获取文本
+     *
+     * @param nodeInfo
+     * @param id
+     * @return
+     */
+    private String getText(AccessibilityNodeInfo nodeInfo, String id) {
+        List<AccessibilityNodeInfo> nodeInfos = nodeInfo.findAccessibilityNodeInfosByViewId(id);
+        for (AccessibilityNodeInfo pass : nodeInfos) {
+            if (pass.getText() == null) continue;
+            return pass.getText().toString();
+        }
+        return null;
+    }
+
+    /**
+     * 提取纯数字
+     *
+     * @param input
+     * @return
+     */
+    private String getInteger(String input) {
+        Pattern pattern = Pattern.compile("\\d");
+        Matcher matcher = pattern.matcher(input);
+        StringBuilder digitsOnly = new StringBuilder();
+        while (matcher.find()) {
+            // 获取匹配的数字字符
+            digitsOnly.append(matcher.group());
+        }
+        return digitsOnly.toString();
+    }
+
+    /**
      * 输入内容
      *
      * @param nodeInfo
      * @param id
      * @param text
      */
-    private void EditNodeInfo(AccessibilityNodeInfo nodeInfo, String id, String text) {
+    private boolean EditNodeInfo(AccessibilityNodeInfo nodeInfo, String id, String text) {
         List<AccessibilityNodeInfo> Passwords = nodeInfo.findAccessibilityNodeInfosByViewId(id);
         for (AccessibilityNodeInfo pass : Passwords) {
+            if (pass.getText() == null) continue;
             String string = pass.getText().toString();
             if (!string.equals(text)) {
                 editText(pass, text);
+                print(String.format("输入登录密码:%s|ID:%s", text, id));
+                return true;
+            } else {
+                return true;
             }
         }
+        return false;
     }
 
     /**
@@ -78,8 +310,8 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
     private void ClickNodeInfo(AccessibilityNodeInfo nodeInfo, String id) {
         List<AccessibilityNodeInfo> logins = nodeInfo.findAccessibilityNodeInfosByViewId(id);
         for (AccessibilityNodeInfo login : logins) {
-            Log.d("显示状态", String.valueOf(login.isVisibleToUser()));
-            login.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+            boolean is = login.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+            print(String.format("点击ID:%s|点击状态:%s", id, is));
         }
     }
 
@@ -91,11 +323,37 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
      */
     private void editText(AccessibilityNodeInfo nodeInfo, String msg) {
         nodeInfo.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-        Log.d("输入信息", msg);
         Bundle arguments = new Bundle();
         arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, msg);
-        nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
+        boolean is = nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
+        print(String.format("输入信息:%s|输入状态:%s", msg, is));
     }
+
+    private void simulateSwipeUp() {
+        if (poolingBean == null) {
+            Path path = new Path();
+            path.moveTo(500, 1000);
+            path.lineTo(500, 1500);
+            GestureDescription.StrokeDescription strokeDescription = new GestureDescription.StrokeDescription(path, 0, GESTURE_DURATION_MS);
+            GestureDescription.Builder builder = new GestureDescription.Builder();
+            builder.addStroke(strokeDescription);
+            dispatchGesture(builder.build(), null, null);
+            print("模拟滑动");
+        }
+        if (isRun) {
+            handler.postDelayed(this::simulateSwipeUp, POST_DELAY_MS);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        isRun = false;
+        poolingBean = null;
+        amount = "0";
+        Log.d("详细", "关闭");
+    }
+
 
     @Override
     public void onInterrupt() {
