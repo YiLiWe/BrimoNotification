@@ -63,6 +63,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
             String string = pass.getText().toString();
             Log.d("控件消息", string);
             if (!string.equals(text)) {
+                pass.performAction(AccessibilityNodeInfo.ACTION_CLICK);
                 editText(pass, text);
             } else {
                 return true;
