@@ -1,7 +1,8 @@
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accessibilityEventTypes="typeAllMask"
-    android:accessibilityFeedbackType="feedbackAllMask"
-    android:accessibilityFlags="flagRetrieveInteractiveWindows|flagReportViewIds"
+    android:accessibilityEventTypes="typeAllMask|typeNotificationStateChanged|typeGestureDetectionEnd|typeViewClicked|typeViewLongClicked|typeViewFocused|typeViewSelected|typeViewTextChanged|typeWindowStateChanged|typeViewHoverEnter|typeViewHoverExit|typeTouchExplorationGestureStart|typeTouchExplorationGestureEnd|typeGestureDetectionStart|typeGestureDetectionEnd|typeWindowContentChanged|typeWindowsChanged|typeViewTextSelectionChanged|typeViewAccessibilityFocused|typeViewAccessibilityFocusCleared|typeViewTextTraversedAtMovementGranularity|typeViewScrolled|typeViewFocused"
+    android:accessibilityFeedbackType="feedbackAllMask|feedbackGeneric|feedbackVisual"
+    android:accessibilityFlags="flagDefault|flagIncludeNotImportantViews|flagReportViewIds|flagRetrieveInteractiveWindows|flagRequestEnhancedWebAccessibility|flagRequestFilterKeyEvents"
+
     android:canPerformGestures="true"
     android:canRequestEnhancedWebAccessibility="true"
     android:canRequestFilterKeyEvents="true"
