@@ -25,7 +25,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
             AccessibilityNodeInfo nodeInfo = getRootInActiveWindow();
             if (nodeInfo == null) return;
             handleLogin(nodeInfo);
-            handlerData(nodeInfo);
+            //handlerData(nodeInfo);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -47,7 +47,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
     private void handleLogin(AccessibilityNodeInfo nodeInfo) {
         //点击首页登录
         ClickNodeInfo(nodeInfo, "id.co.bri.brimo:id/btn_login");
-        EditNodeInfo(nodeInfo, "id.cobri.brimo:id/et_password", pass);
+        EditNodeInfo(nodeInfo, "id.co.bri.brimo:id/et_password", pass);
         ClickNodeInfo(nodeInfo, "id.co.bri.brimo:id/button_login");
     }
 
