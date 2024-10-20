@@ -21,7 +21,7 @@
 
         <!--通知监听服务-->
         <service
-            android:name=".servic.NotifyService"
+            android:name=".service.NotifyService"
             android:exported="true"
             android:label="收款监听"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
@@ -29,6 +29,19 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
+        </service>
+
+        <service
+            android:name=".service.NotionalPoolingAccessibilityService"
+            android:exported="true"
+            android:label="@string/accessibility_service_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
         </service>
 
         <activity

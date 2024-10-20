@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BrimoNotification</string>
+    <string name="accessibility_service_description">监听</string>
+    <string name="accessibility_service_label">监听</string>
 </resources>

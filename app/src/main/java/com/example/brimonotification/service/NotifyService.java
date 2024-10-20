@@ -1,4 +1,4 @@
-package com.example.brimonotification.servic;
+package com.example.brimonotification.service;
 
 import android.app.Notification;
 import android.content.ComponentName;

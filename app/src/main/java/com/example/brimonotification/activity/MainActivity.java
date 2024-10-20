@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.example.brimonotification.R;
-import com.example.brimonotification.servic.NotifyService;
+import com.example.brimonotification.service.NotifyService;
 import com.example.brimonotification.databinding.ActivityMainBinding;
 
 import java.util.Set;

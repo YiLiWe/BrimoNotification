@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.example.brimonotification.databinding.LayoutWindowBinding;
-import com.example.brimonotification.servic.NotifyService;
+import com.example.brimonotification.service.NotifyService;
 
 import lombok.Data;
 
