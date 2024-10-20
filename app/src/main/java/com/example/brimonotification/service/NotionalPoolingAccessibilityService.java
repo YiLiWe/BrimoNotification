@@ -28,12 +28,14 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+        handlerData(event.getSource());
         AccessibilityNodeInfo nodeInfo = getRootInActiveWindow();
         if (nodeInfo == null) return;
         handleLogin(nodeInfo);
-        handlerData(nodeInfo);
     }
+
     private void handlerData(AccessibilityNodeInfo nodeInfo) {
+        if (nodeInfo == null) return;
         List<AccessibilityNodeInfo> nodeInfos = new ArrayList<>();
         AccessibilityUtils.getAccessibilityNodeInfoS(nodeInfos, nodeInfo);
         for (AccessibilityNodeInfo nodeInfo1 : nodeInfos) {
