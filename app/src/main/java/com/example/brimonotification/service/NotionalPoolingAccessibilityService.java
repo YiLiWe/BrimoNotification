@@ -59,7 +59,11 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
     private boolean EditNodeInfo(AccessibilityNodeInfo nodeInfo, String id, String text) {
         List<AccessibilityNodeInfo> Passwords = nodeInfo.findAccessibilityNodeInfosByViewId(id);
         for (AccessibilityNodeInfo pass : Passwords) {
-            if (pass == null || pass.getText() == null) continue;
+            if (pass == null) continue;
+            if (pass.getText() == null) {
+                editText(pass, text);
+                continue;
+            }
             String string = pass.getText().toString();
             Log.d("控件消息", string);
             if (!string.equals(text)) {
