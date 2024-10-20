@@ -21,9 +21,13 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        AccessibilityNodeInfo nodeInfo = getRootInActiveWindow();
-        if (nodeInfo == null) return;
-        handleLogin(nodeInfo);
+        try {
+            AccessibilityNodeInfo nodeInfo = getRootInActiveWindow();
+            if (nodeInfo == null) return;
+            handleLogin(nodeInfo);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         //handlerData(nodeInfo);
     }
 
