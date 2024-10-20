@@ -51,6 +51,12 @@ public class MainActivity extends AppCompatActivity {
     private void initClick() {
         binding.notify.setOnClickListener(this::ClickNotify);
         binding.toolbar.setOnMenuItemClickListener(this::OnMenu);
+        binding.notionalPooling.setOnClickListener(this::ClickNotionalPooling);
+    }
+
+    private void ClickNotionalPooling(View view) {
+        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+        startActivity(intent);
     }
 
     private void ClickNotify(View view) {
