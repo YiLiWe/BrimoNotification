@@ -82,12 +82,6 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                start();
-            }
-        }, 10_000);
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
                 NotionalPooling();
             }
         }, NotionalPoolingTimeMAX);
@@ -244,6 +238,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
         print("首页按钮数量:" + transfers.size());
         for (AccessibilityNodeInfo transfer : transfers) {
             if (transfer.getViewIdResourceName() == null) continue;
+            print(transfer.getViewIdResourceName());
             if (transfer.getViewIdResourceName().equals("id.co.bri.brimo:id/namaMenu")) {
                 AccessibilityNodeInfo parent = transfer.getParent();
                 boolean is = parent.getParent().getParent().performAction(AccessibilityNodeInfo.ACTION_CLICK);
