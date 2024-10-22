@@ -36,6 +36,7 @@ public class ApplicationHook {
     private void HooksContentMethod(int i, de.robv.android.xposed.XC_MethodHook.MethodHookParam methodHookParam) {
         if (i == 0) return;
         Log.print("成功拿到");
+        Log.print("实体类:"+methodHookParam.thisObject.getClass().getName());
         if (methodHookParam.thisObject instanceof Application application) {
             Log.print("跳转");
             Intent intent = new Intent();
