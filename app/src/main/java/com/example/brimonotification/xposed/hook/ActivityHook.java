@@ -39,6 +39,11 @@ public class ActivityHook {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 super.beforeHookedMethod(param);
+                if (param.thisObject instanceof Activity activity){
+                    Intent intent = new Intent();
+                    intent.setComponent(new ComponentName("id.co.bri.brimo", "id.co.bri.brimo.ui.activities.FastMenuActivity"));
+                    activity.startActivity(intent);
+                }
                 Log.print("关闭");
             }
         });
