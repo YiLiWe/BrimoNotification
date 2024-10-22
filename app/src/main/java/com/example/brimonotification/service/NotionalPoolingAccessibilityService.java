@@ -95,6 +95,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
             CharSequence sequence = event.getClassName();
             if (sequence != null) {
                 boolean is = nodeInfo == null;
+                print("shine:onAccessibilityEvent,className =" + sequence + "|界面信息是否为空:" + is);
                 Log.i(TAG, "shine:onAccessibilityEvent,className =" + sequence + "|界面信息是否为空:" + is);
             }
         }
