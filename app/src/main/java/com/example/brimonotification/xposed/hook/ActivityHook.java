@@ -35,6 +35,20 @@ public class ActivityHook {
      * 抓取跳转信息
      */
     public void startActivity() {
+        XposedBridge.hookAllMethods(Activity.class,"finish",new XC_MethodHook(){
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                super.beforeHookedMethod(param);
+                Log.print("关闭");
+            }
+        });
+        XposedBridge.hookAllMethods(System.class,"exit",new XC_MethodHook(){
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                super.beforeHookedMethod(param);
+                Log.print("关闭x");
+            }
+        });
         //XposedHelpers.findAndHookMethod(Activity.class, "startActivity", Intent.class, Bundle.class, new XC_MethodHook(this::startActivity));
     }
 
