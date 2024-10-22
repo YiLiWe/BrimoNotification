@@ -39,11 +39,12 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
     private NotionalPoolingBean poolingBean = null;//转账信息
     private boolean isRun = true; // Ensures thread-safe access
     private final Timer timer = new Timer();
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private AccessibilityNodeInfo nodeInfo = null;
 
     private final long NotionalPoolingTimeMAX = 10000;//获取归集数据集间隔
     private final long POST_DELAY_MS = 20000, GESTURE_DURATION_MS = 1000; // Delay for posting logs
 
-    private AccessibilityNodeInfo nodeInfo = null;
 
     @Override
     protected void onServiceConnected() {
@@ -90,9 +91,16 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         AccessibilityNodeInfo nodeInfo = getRootInActiveWindow();
+        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            CharSequence sequence = event.getClassName();
+            if (sequence != null) {
+                boolean is = nodeInfo == null;
+                Log.i(TAG, "shine:onAccessibilityEvent,className =" + sequence + "|界面信息是否为空:" + is);
+            }
+        }
         if (nodeInfo != null) {
             List<AccessibilityNodeInfo> nodeInfos = nodeInfo.findAccessibilityNodeInfosByText("Tambah Penerima Baru");
-            print("数量X:"+nodeInfos.size());
+            print("数量X:" + nodeInfos.size());
             this.nodeInfo = nodeInfo;
         }
         start();
@@ -364,15 +372,19 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
         print(String.format("输入信息:%s|输入状态:%s", msg, is));
     }
 
+    private void SwipeUp() {
+        Path path = new Path();
+        path.moveTo(500, 1000);
+        path.lineTo(500, 1500);
+        GestureDescription.StrokeDescription strokeDescription = new GestureDescription.StrokeDescription(path, 0, GESTURE_DURATION_MS);
+        GestureDescription.Builder builder = new GestureDescription.Builder();
+        builder.addStroke(strokeDescription);
+        dispatchGesture(builder.build(), null, null);
+    }
+
     private void simulateSwipeUp() {
         if (poolingBean == null) {
-            Path path = new Path();
-            path.moveTo(500, 1000);
-            path.lineTo(500, 1500);
-            GestureDescription.StrokeDescription strokeDescription = new GestureDescription.StrokeDescription(path, 0, GESTURE_DURATION_MS);
-            GestureDescription.Builder builder = new GestureDescription.Builder();
-            builder.addStroke(strokeDescription);
-            dispatchGesture(builder.build(), null, null);
+            handler.post(this::SwipeUp);
             print("模拟滑动");
         } else {
             print("停止滑动");
