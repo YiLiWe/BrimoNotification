@@ -92,6 +92,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
         AccessibilityNodeInfo nodeInfo = getRootInActiveWindow();
         if (nodeInfo != null) {
             this.nodeInfo = nodeInfo;
+            print(nodeInfo.toString());
         }
         start();
     }
