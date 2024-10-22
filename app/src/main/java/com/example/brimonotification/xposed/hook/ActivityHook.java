@@ -48,6 +48,7 @@ public class ActivityHook {
             }
         });
         XposedBridge.hookAllMethods(Activity.class,"startActivity",new XC_MethodHook(this::startActivity));
+        XposedBridge.hookAllMethods(Context.class,"startActivity",new XC_MethodHook(this::startActivity));
     }
 
     private void startActivity(int i, de.robv.android.xposed.XC_MethodHook.MethodHookParam param) {

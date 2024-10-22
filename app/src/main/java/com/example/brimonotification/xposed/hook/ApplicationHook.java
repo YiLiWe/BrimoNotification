@@ -36,9 +36,6 @@ public class ApplicationHook {
     private void HooksContentMethod(int i, de.robv.android.xposed.XC_MethodHook.MethodHookParam methodHookParam) {
         if (i == 0) return;
         if (methodHookParam.args[0] instanceof Application application) {
-            Intent intent = new Intent();
-            intent.setComponent(new ComponentName("id.co.bri.brimo", "id.co.bri.brimo.ui.activities.FastMenuActivity"));
-            application.startActivities(new Intent[]{intent,intent,intent,intent});
             this.context = application.getApplicationContext();
             application.registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks(this));
         }
