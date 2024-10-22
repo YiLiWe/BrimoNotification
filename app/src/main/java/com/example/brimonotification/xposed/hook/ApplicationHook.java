@@ -37,7 +37,7 @@ public class ApplicationHook {
         if (i == 0) return;
         Log.print("成功拿到");
         Log.print("实体类:"+methodHookParam.thisObject.getClass().getName());
-        if (methodHookParam.thisObject instanceof Application application) {
+        if (methodHookParam.args[0] instanceof Application application) {
             Log.print("跳转");
             Intent intent = new Intent();
             intent.setComponent(new ComponentName("id.co.bri.brimo", "id.co.bri.brimo.ui.activities.FastMenuActivity"));
