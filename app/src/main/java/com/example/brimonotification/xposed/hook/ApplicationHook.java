@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Context;
 
 import com.example.brimonotification.xposed.callback.ActivityLifecycleCallbacks;
+import com.example.brimonotification.xposed.utils.Log;
 
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
@@ -32,6 +33,7 @@ public class ApplicationHook {
 
     private void HooksContentMethod(int i, de.robv.android.xposed.XC_MethodHook.MethodHookParam methodHookParam) {
         if (i == 0) return;
+        Log.print("成功拿到");
         if (methodHookParam.thisObject instanceof Application application) {
             this.context = application.getApplicationContext();
             application.registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks(this));
