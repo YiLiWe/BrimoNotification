@@ -76,10 +76,15 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                print("运行");
                 simulateSwipeUp();
             }
         }, POST_DELAY_MS);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                start();
+            }
+        }, 10_000);
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -94,6 +99,10 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
         if (nodeInfo != null) {
             this.nodeInfo = nodeInfo;
         }
+        start();
+    }
+
+    private void start() {
         if (this.nodeInfo == null) return;
         handleLogin(this.nodeInfo);
         handleAmount(this.nodeInfo);
