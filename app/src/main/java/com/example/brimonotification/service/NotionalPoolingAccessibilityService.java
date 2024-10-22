@@ -246,7 +246,8 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
             if (transfer.getViewIdResourceName() == null) continue;
             if (transfer.getViewIdResourceName().equals("id.co.bri.brimo:id/namaMenu")) {
                 AccessibilityNodeInfo parent = transfer.getParent();
-                parent.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                boolean is = parent.getParent().getParent().performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                print("首页按钮点击事件:" + is);
             }
         }
     }
