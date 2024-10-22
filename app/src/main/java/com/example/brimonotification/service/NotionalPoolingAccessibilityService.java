@@ -355,7 +355,6 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
      * @param msg
      */
     private void editText(AccessibilityNodeInfo nodeInfo, String msg) {
-        nodeInfo.performAction(AccessibilityNodeInfo.ACTION_CLICK);
         Bundle arguments = new Bundle();
         arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, msg);
         boolean is = nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
