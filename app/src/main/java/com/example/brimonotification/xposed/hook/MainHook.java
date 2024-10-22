@@ -83,6 +83,23 @@ public class MainHook implements IXposedHookLoadPackage {
                     super.afterHookedMethod(param);
                 }
             });
+
+            XposedHelpers.findAndHookMethod(StackTraceElement.class, "getClassName", new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    String result = (String) param.getResult();
+                    if (result != null){
+                        if (result.contains("xposed")) {
+                            param.setResult("");
+                            // Log.i(tag, "替换了，字符串名称 " + result);
+                        }else if(result.contains("com.android.internal.os.ZygoteInit")){
+                            param.setResult("");
+                        }
+                    }
+
+                    super.afterHookedMethod(param);
+                }
+            });
             ApplicationHook.getInstance(loadPackageParam);
             ActivityHook.getInstance(loadPackageParam).startActivity();
         }
