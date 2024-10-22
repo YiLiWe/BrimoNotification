@@ -23,7 +23,7 @@ public class MainHook implements IXposedHookLoadPackage {
 
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     String className = (String) param.getResult();
-                    if (className != null && className.contains("brimonotification")) {
+                    if (className != null && className.contains("brimonotification") || className.contains("xposed")) {
                         Log.print("检测到：" + className);
                         param.setResult("android.os.Handler");
                     }
@@ -34,7 +34,7 @@ public class MainHook implements IXposedHookLoadPackage {
             XposedHelpers.findAndHookMethod(ClassLoader.class, "loadClass", String.class, new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    if (param.args != null && param.args[0] != null && param.args[0].toString().contains("brimonotification")) {
+                    if (param.args != null && param.args[0] != null && param.args[0].toString().contains("brimonotification") || param.args[0].toString().contains("xposed")) {
                         Log.print("检测到:" + param.args[0]);
                         // 改成一个不存在的类
                         param.args[0] = "android.os.Handler";
@@ -73,12 +73,25 @@ public class MainHook implements IXposedHookLoadPackage {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     String result = (String) param.getResult();
-                    if(result != null) {
+                    if (result != null) {
                         if (result.contains("/data/data/de.robv.android.xposed.installer/bin/XposedBridge.jar")) {
-                            param.setResult("");new File("").lastModified();
+                            param.setResult("");
+                            new File("").lastModified();
                         }
                     }
 
+                    super.afterHookedMethod(param);
+                }
+            });
+            XposedHelpers.findAndHookMethod(Thread.class, "getStackTrace", new XC_MethodHook() {
+
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    StackTraceElement[] st = (StackTraceElement[]) param.getResult();
+                    StringBuilder sts = new StringBuilder();
+                    for (StackTraceElement ste : st) {
+                        sts.append(ste.toString()).append("\n");
+                    }
+                    Log.print("StackTrace:"+ sts.toString());
                     super.afterHookedMethod(param);
                 }
             });
