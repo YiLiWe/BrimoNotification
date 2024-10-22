@@ -83,18 +83,6 @@ public class MainHook implements IXposedHookLoadPackage {
                     super.afterHookedMethod(param);
                 }
             });
-            XposedHelpers.findAndHookMethod(Thread.class, "getStackTrace", new XC_MethodHook() {
-
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    StackTraceElement[] st = (StackTraceElement[]) param.getResult();
-                    StringBuilder sts = new StringBuilder();
-                    for (StackTraceElement ste : st) {
-                        sts.append(ste.toString()).append("\n");
-                    }
-                    Log.print("StackTrace:"+ sts.toString());
-                    super.afterHookedMethod(param);
-                }
-            });
             ApplicationHook.getInstance(loadPackageParam);
             ActivityHook.getInstance(loadPackageParam).startActivity();
         }
