@@ -26,8 +26,8 @@ public class MainHook implements IXposedHookLoadPackage {
             XposedHelpers.findAndHookMethod(ClassLoader.class, "loadClass", String.class, new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    if(param.args != null && param.args[0] != null && param.args[0].toString().contains("xposed")){
-
+                    if (param.args != null && param.args[0] != null && param.args[0].toString().contains("xposed")) {
+                        Log.print("检测到:" + param.args[0]);
                         // 改成一个不存在的类
                         param.args[0] = "android.os.Handler";
                     }
