@@ -17,11 +17,15 @@ import com.example.brimonotification.bean.NotionalPoolingBean;
 import com.example.brimonotification.runnable.NotionalPoolingDataRunnable;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 自动归集
@@ -31,13 +35,15 @@ import lombok.EqualsAndHashCode;
 public class NotionalPoolingAccessibilityService extends AccessibilityService {
     private static final String TAG = "NotionalPoolingAccessibilityService";
     private final String pass = "Coc135689";//登录密码
-    private String amount = "0";//余额
-    private NotionalPoolingBean poolingBean;//转账信息
-    private final Handler handler = new Handler(Looper.getMainLooper());//自动刷新
+    private String amount = "1000";//余额
+    private NotionalPoolingBean poolingBean = null;//转账信息
     private boolean isRun = true; // Ensures thread-safe access
+    private final Timer timer = new Timer();
 
-    private final long NotionalPoolingTimeMAX = 10_000;//获取归集数据集间隔
-    private final long POST_DELAY_MS = 20_000, GESTURE_DURATION_MS = 1000; // Delay for posting logs
+    private final long NotionalPoolingTimeMAX = 10000;//获取归集数据集间隔
+    private final long POST_DELAY_MS = 20000, GESTURE_DURATION_MS = 1000; // Delay for posting logs
+
+    private AccessibilityNodeInfo nodeInfo = null;
 
     @Override
     protected void onServiceConnected() {
@@ -50,32 +56,48 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
         Log.d(TAG, msg);
     }
 
-    @Data
-    private class NotionalPooling implements Runnable {
-        public final NotionalPoolingAccessibilityService service;
-
-        @Override
-        public void run() {
-            if (poolingBean == null && !amount.equals("0")) {//判断数据，金额不为0，才执行
-                print("请求归集数据");
-                new Thread(new NotionalPoolingDataRunnable(service)).start();
-            }
-            handler.postDelayed(this, NotionalPoolingTimeMAX);
+    private void NotionalPooling() {
+        if (!isRun) return;
+        if (poolingBean == null && !amount.equals("0")) {//判断数据，金额不为0，才执行
+            print("请求归集数据");
+            new Thread(new NotionalPoolingDataRunnable(this)).start();
+        } else {
+            print("归集数据不为空");
         }
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                NotionalPooling();
+            }
+        }, NotionalPoolingTimeMAX);
     }
 
     private void startData() {
-        handler.postDelayed(new NotionalPooling(this), NotionalPoolingTimeMAX);
-        handler.postDelayed(this::simulateSwipeUp, POST_DELAY_MS);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                print("运行");
+                simulateSwipeUp();
+            }
+        }, POST_DELAY_MS);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                NotionalPooling();
+            }
+        }, NotionalPoolingTimeMAX);
     }
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         AccessibilityNodeInfo nodeInfo = getRootInActiveWindow();
-        if (nodeInfo == null) return;
-        handleLogin(nodeInfo);
-        handleAmount(nodeInfo);
-        handleTransfer(nodeInfo);
+        if (nodeInfo != null) {
+            this.nodeInfo = nodeInfo;
+        }
+        if (this.nodeInfo == null) return;
+        handleLogin(this.nodeInfo);
+        handleAmount(this.nodeInfo);
+        handleTransfer(this.nodeInfo);
     }
 
     /**
@@ -339,9 +361,16 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
             builder.addStroke(strokeDescription);
             dispatchGesture(builder.build(), null, null);
             print("模拟滑动");
+        } else {
+            print("停止滑动");
         }
         if (isRun) {
-            handler.postDelayed(this::simulateSwipeUp, POST_DELAY_MS);
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    simulateSwipeUp();
+                }
+            }, POST_DELAY_MS);
         }
     }
 

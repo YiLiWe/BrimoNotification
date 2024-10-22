@@ -9,12 +9,10 @@ import lombok.Data;
 @Data
 public class NotionalPoolingDataRunnable implements Runnable {
     private final NotionalPoolingAccessibilityService service;
-    private final Object lock = new Object();
 
     @Override
     public void run() {
-        if (service.getPoolingBean() == null) return;
-        synchronized (lock) {
+        synchronized (service) {
             NotionalPoolingBean poolingBean = new NotionalPoolingBean();
             poolingBean.setAccount("119301023317509");
             poolingBean.setBank("BRI");

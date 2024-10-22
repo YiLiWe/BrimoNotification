@@ -17,7 +17,7 @@ import com.example.brimonotification.activity.adapter.BillAdapter;
 import com.example.brimonotification.bean.NotificationBean;
 import com.example.brimonotification.databinding.ActivityBillBinding;
 import com.example.brimonotification.helper.MyDBOpenHelper;
-import com.example.brimonotification.runnable.PostDataRunnable;
+import com.example.brimonotification.runnable.NotifyPostDataRunnable;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 
 import java.util.ArrayList;
@@ -85,7 +85,7 @@ public class BillActivity extends AppCompatActivity  {
      * @param bean
      */
     public void post(NotificationBean bean) {
-        PostDataRunnable postDataRunnable = new PostDataRunnable(bean, bean.getId());
+        NotifyPostDataRunnable postDataRunnable = new NotifyPostDataRunnable(bean, bean.getId());
         postDataRunnable.setOnMessage(this::onMessage);
     }
 

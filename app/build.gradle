@@ -9,9 +9,9 @@ android {
     defaultConfig {
         applicationId "com.example.brimonotification"
         minSdk 26
-        targetSdk 35
-        versionCode 1
-        versionName "1.0"
+        targetSdk 34
+        versionCode 6
+        versionName "1.7"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -33,6 +33,10 @@ android {
 }
 
 dependencies {
+    implementation project(':FloatWindow')
+    compileOnly files('lib/api-82.jar')
+    compileOnly files('lib/api-82-sources.jar')
+
     implementation libs.refresh.layout.kernel      //核心必须依赖
     implementation libs.refresh.header.classics    //经典刷新头
     implementation libs.refresh.footer.classics    //经典加载
@@ -43,7 +47,6 @@ dependencies {
     implementation libs.lombok
     annotationProcessor libs.lombok
 
-//简单工具类库
     implementation libs.appcompat
     implementation libs.material
     testImplementation libs.junit
