@@ -47,14 +47,7 @@ public class ActivityHook {
                 Log.print("关闭");
             }
         });
-        XposedBridge.hookAllMethods(System.class,"exit",new XC_MethodHook(){
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                super.beforeHookedMethod(param);
-                Log.print("关闭x");
-            }
-        });
-        //XposedHelpers.findAndHookMethod(Activity.class, "startActivity", Intent.class, Bundle.class, new XC_MethodHook(this::startActivity));
+        XposedBridge.hookAllMethods(Activity.class,"startActivity",new XC_MethodHook(this::startActivity));
     }
 
     private void startActivity(int i, de.robv.android.xposed.XC_MethodHook.MethodHookParam param) {
