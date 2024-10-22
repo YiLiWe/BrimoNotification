@@ -40,14 +40,11 @@ public class ActivityHook {
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 super.beforeHookedMethod(param);
                 if (param.thisObject instanceof Activity activity){
-                    Intent intent = new Intent();
-                    intent.setComponent(new ComponentName("id.co.bri.brimo", "id.co.bri.brimo.ui.activities.FastMenuActivity"));
-                    activity.startActivity(intent);
+                    param.setResult(null); // 阻止原方法执行
                 }
                 Log.print("关闭");
             }
         });
-        XposedBridge.hookAllMethods(Activity.class,"startActivity",new XC_MethodHook(this::startActivity));
         XposedBridge.hookAllMethods(Context.class,"startActivity",new XC_MethodHook(this::startActivity));
     }
 
