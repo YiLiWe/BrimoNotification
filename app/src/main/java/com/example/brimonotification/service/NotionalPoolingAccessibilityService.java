@@ -90,21 +90,24 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        AccessibilityNodeInfo nodeInfo = getRootInActiveWindow();
-        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            CharSequence sequence = event.getClassName();
-            if (sequence != null) {
-                boolean is = nodeInfo == null;
-                print("shine:onAccessibilityEvent,className =" + sequence + "|界面信息是否为空:" + is);
-                Log.i(TAG, "shine:onAccessibilityEvent,className =" + sequence + "|界面信息是否为空:" + is);
+        try {
+            AccessibilityNodeInfo nodeInfo = getRootInActiveWindow();
+            if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+                CharSequence sequence = event.getClassName();
+                if (sequence != null) {
+                    boolean is = nodeInfo == null;
+                    Log.i(TAG, "shine:onAccessibilityEvent,className =" + sequence + "|界面信息是否为空:" + is);
+                }
             }
+            if (nodeInfo != null) {
+                List<AccessibilityNodeInfo> nodeInfos = nodeInfo.findAccessibilityNodeInfosByText("Tambah Penerima Baru");
+                print("数量X:" + nodeInfos.size());
+                this.nodeInfo = nodeInfo;
+            }
+            start();
+        }catch (Throwable e){
+            e.printStackTrace();
         }
-        if (nodeInfo != null) {
-            List<AccessibilityNodeInfo> nodeInfos = nodeInfo.findAccessibilityNodeInfosByText("Tambah Penerima Baru");
-            print("数量X:" + nodeInfos.size());
-            this.nodeInfo = nodeInfo;
-        }
-        start();
     }
 
     private void start() {
