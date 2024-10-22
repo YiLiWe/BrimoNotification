@@ -91,6 +91,8 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
     public void onAccessibilityEvent(AccessibilityEvent event) {
         AccessibilityNodeInfo nodeInfo = getRootInActiveWindow();
         if (nodeInfo != null) {
+            List<AccessibilityNodeInfo> nodeInfos = nodeInfo.findAccessibilityNodeInfosByText("Tambah Penerima Baru");
+            print("数量X:"+nodeInfos.size());
             this.nodeInfo = nodeInfo;
         }
         start();
