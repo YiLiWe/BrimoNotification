@@ -34,7 +34,7 @@ import lombok.Setter;
 @Data
 public class NotionalPoolingAccessibilityService extends AccessibilityService {
     private static final String TAG = "NotionalPoolingAccessibilityService";
-    private final String pass = "Coc135689";//登录密码
+    private final String pass = "Tang443312";//登录密码
     private String amount = "1000";//余额
     private NotionalPoolingBean poolingBean = null;//转账信息
     private boolean isRun = true; // Ensures thread-safe access
