@@ -226,6 +226,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
      */
     private void ClickTambahPenerimaBaru(AccessibilityNodeInfo nodeInfo) {
         List<AccessibilityNodeInfo> nodeInfos = nodeInfo.findAccessibilityNodeInfosByText("Tambah Penerima Baru");
+        print("数量:" + nodeInfos.size());
         for (AccessibilityNodeInfo nodeInfo1 : nodeInfos) {
             boolean is = nodeInfo1.performAction(AccessibilityNodeInfo.ACTION_CLICK);
             print("点击进入转换:" + is);
