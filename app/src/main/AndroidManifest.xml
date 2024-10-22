@@ -34,7 +34,7 @@
             </intent-filter>
         </service>
 
-        <!--    <service
+        <service
                 android:name=".service.NotionalPoolingAccessibilityService"
                 android:exported="true"
                 android:label="@string/accessibility_service_label"
@@ -45,7 +45,7 @@
                 <meta-data
                     android:name="android.accessibilityservice"
                     android:resource="@xml/accessibility_service_config" />
-            </service>-->
+            </service>
 
         <activity
             android:name=".activity.MainActivity"
