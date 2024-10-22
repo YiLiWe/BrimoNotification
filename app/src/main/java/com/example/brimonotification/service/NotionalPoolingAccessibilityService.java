@@ -226,7 +226,11 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
      * @param nodeInfo
      */
     private void ClickTambahPenerimaBaru(AccessibilityNodeInfo nodeInfo) {
-        ClickNodeInfo(nodeInfo, "id.co.bri.brimo:id/btnSubmit");
+        List<AccessibilityNodeInfo> nodeInfos = nodeInfo.findAccessibilityNodeInfosByText("Tambah Penerima Baru");
+        for (AccessibilityNodeInfo nodeInfo1 : nodeInfos) {
+            boolean is = nodeInfo1.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+            print("点击进入转换:" + is);
+        }
     }
 
     /**
@@ -236,7 +240,6 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
      */
     private void ClickTransfer(AccessibilityNodeInfo nodeInfo) {
         List<AccessibilityNodeInfo> transfers = nodeInfo.findAccessibilityNodeInfosByText("Transfer");
-        print("首页按钮数量:" + transfers.size());
         for (AccessibilityNodeInfo transfer : transfers) {
             if (transfer.getViewIdResourceName() == null) continue;
             print(transfer.getViewIdResourceName());
