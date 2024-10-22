@@ -263,8 +263,9 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
     private void handleLogin(AccessibilityNodeInfo nodeInfo) {
         //点击首页登录
         ClickNodeInfo(nodeInfo, "id.co.bri.brimo:id/btn_login");
-        EditNodeInfo(nodeInfo, "id.co.bri.brimo:id/et_password", pass);
-        ClickNodeInfo(nodeInfo, "id.co.bri.brimo:id/button_login");
+        if(EditNodeInfo(nodeInfo, "id.co.bri.brimo:id/et_password", pass)) {
+            ClickNodeInfo(nodeInfo, "id.co.bri.brimo:id/button_login");
+        }
     }
 
     /**
@@ -315,7 +316,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
             if (!string.equals(text)) {
                 editText(pass, text);
                 print(String.format("输入登录密码:%s|ID:%s", text, id));
-                return true;
+                return false;
             } else {
                 print("输入状态:" + string);
                 return true;
