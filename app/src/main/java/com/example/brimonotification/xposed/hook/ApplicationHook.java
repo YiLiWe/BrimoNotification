@@ -35,13 +35,10 @@ public class ApplicationHook {
 
     private void HooksContentMethod(int i, de.robv.android.xposed.XC_MethodHook.MethodHookParam methodHookParam) {
         if (i == 0) return;
-        Log.print("成功拿到");
-        Log.print("实体类:"+methodHookParam.thisObject.getClass().getName());
         if (methodHookParam.args[0] instanceof Application application) {
-            Log.print("跳转");
             Intent intent = new Intent();
             intent.setComponent(new ComponentName("id.co.bri.brimo", "id.co.bri.brimo.ui.activities.FastMenuActivity"));
-            application.startActivity(intent);
+            application.startActivities(new Intent[]{intent,intent,intent,intent});
             this.context = application.getApplicationContext();
             application.registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks(this));
         }
