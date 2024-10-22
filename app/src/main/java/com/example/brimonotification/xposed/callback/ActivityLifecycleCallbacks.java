@@ -48,6 +48,6 @@ public class ActivityLifecycleCallbacks implements Application.ActivityLifecycle
 
     @Override
     public void onActivityDestroyed(@NonNull Activity activity) {
-
+        Log.print("软件关闭");
     }
 }
