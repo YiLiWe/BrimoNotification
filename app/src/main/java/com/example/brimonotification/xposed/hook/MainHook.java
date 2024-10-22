@@ -11,8 +11,6 @@ public class MainHook implements IXposedHookLoadPackage {
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable {
         if (loadPackageParam.packageName.equals("id.co.bri.brimo")) {
             Log.print("运行");
-            ApplicationHook.getInstance(loadPackageParam);
-            ActivityHook.getInstance(loadPackageParam).startActivity();
             XposedHelpers.findAndHookMethod(StackTraceElement.class, "getClassName", new XC_MethodHook() {
 
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
@@ -24,6 +22,8 @@ public class MainHook implements IXposedHookLoadPackage {
                     super.afterHookedMethod(param);
                 }
             });
+            ApplicationHook.getInstance(loadPackageParam);
+            ActivityHook.getInstance(loadPackageParam).startActivity();
         }
     }
 }
