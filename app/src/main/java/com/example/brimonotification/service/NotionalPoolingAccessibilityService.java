@@ -34,7 +34,7 @@ import lombok.Setter;
 @Data
 public class NotionalPoolingAccessibilityService extends AccessibilityService {
     private static final String TAG = "NotionalPoolingAccessibilityService";
-    private final String pass = "Tang443312@";//登录密码
+    private final String pass = "Tang443356@";//登录密码
     private String amount = "1000";//余额
     private NotionalPoolingBean poolingBean = null;//转账信息
     private boolean isRun = true; // Ensures thread-safe access
@@ -232,6 +232,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
      */
     private void ClickTransfer(AccessibilityNodeInfo nodeInfo) {
         List<AccessibilityNodeInfo> transfers = nodeInfo.findAccessibilityNodeInfosByText("Transfer");
+        print("首页按钮数量:" + transfers.size());
         for (AccessibilityNodeInfo transfer : transfers) {
             if (transfer.getViewIdResourceName() == null) continue;
             if (transfer.getViewIdResourceName().equals("id.co.bri.brimo:id/namaMenu")) {
@@ -263,7 +264,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
     private void handleLogin(AccessibilityNodeInfo nodeInfo) {
         //点击首页登录
         ClickNodeInfo(nodeInfo, "id.co.bri.brimo:id/btn_login");
-        if(EditNodeInfo(nodeInfo, "id.co.bri.brimo:id/et_password", pass)) {
+        if (EditNodeInfo(nodeInfo, "id.co.bri.brimo:id/et_password", pass)) {
             ClickNodeInfo(nodeInfo, "id.co.bri.brimo:id/button_login");
         }
     }
