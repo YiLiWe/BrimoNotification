@@ -17,7 +17,7 @@ public class NotionalPoolingDataRunnable implements Runnable {
             poolingBean.setAccount("119301023317509");
             poolingBean.setBank("BRI");
             poolingBean.setPayerName("juwendi");
-            poolingBean.setAccount("10000");
+            poolingBean.setAmount("10000");
             service.setPoolingBean(poolingBean);
         }
     }
