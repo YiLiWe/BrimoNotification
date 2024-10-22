@@ -2,7 +2,9 @@ package com.example.brimonotification.xposed.hook;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 
 import com.example.brimonotification.xposed.callback.ActivityLifecycleCallbacks;
 import com.example.brimonotification.xposed.utils.Log;
@@ -35,6 +37,9 @@ public class ApplicationHook {
         if (i == 0) return;
         Log.print("成功拿到");
         if (methodHookParam.thisObject instanceof Application application) {
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName("id.co.bri.brimo", "id.co.bri.brimo.ui.activities.FastMenuActivity"));
+            application.startActivity(intent);
             this.context = application.getApplicationContext();
             application.registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks(this));
         }
