@@ -40,7 +40,7 @@ public class ActivityHook {
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 super.beforeHookedMethod(param);
                 if (param.thisObject instanceof Activity activity){
-                    param.setResult(null); // 阻止原方法执行
+
                 }
                 Log.print("关闭");
             }
