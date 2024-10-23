@@ -88,11 +88,12 @@ public class MainHook implements IXposedHookLoadPackage {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     String result = (String) param.getResult();
-                    if (result != null){
+                    if (result != null) {
+                        Log.print("检测:" + result);
                         if (result.contains("xposed")) {
                             param.setResult("");
                             // Log.i(tag, "替换了，字符串名称 " + result);
-                        }else if(result.contains("com.android.internal.os.ZygoteInit")){
+                        } else if (result.contains("com.android.internal.os.ZygoteInit")) {
                             param.setResult("");
                         }
                     }
