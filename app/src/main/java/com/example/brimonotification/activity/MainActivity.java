@@ -1,5 +1,6 @@
 package com.example.brimonotification.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.net.Uri;

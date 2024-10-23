@@ -29,15 +29,13 @@ android {
     buildFeatures {
         viewBinding true
         buildConfig true
+        aidl = true
     }
 }
 
 dependencies {
     implementation project(':FloatWindow')
 
-    implementation(libs.com.github.kyuubiran.ezxhelper)
-    compileOnly(libs.dev.rikka.hidden.stub)
-    implementation libs.dev.rikka.hidden.compat
     compileOnly(libs.de.robv.android.xposed.api)
 
     implementation libs.refresh.layout.kernel      //核心必须依赖
