@@ -34,8 +34,10 @@ android {
 
 dependencies {
     implementation project(':FloatWindow')
-    compileOnly files('lib/api-82.jar')
-    compileOnly files('lib/api-82-sources.jar')
+
+    compileOnly(libs.dev.rikka.hidden.stub)
+    implementation libs.dev.rikka.hidden.compat
+    compileOnly(libs.de.robv.android.xposed.api)
 
     implementation libs.refresh.layout.kernel      //核心必须依赖
     implementation libs.refresh.header.classics    //经典刷新头
