@@ -67,7 +67,7 @@
             android:value="BRImo" />
         <meta-data
             android:name="xposedminversion"
-            android:value="51" />
+            android:value="82" />
 
     </application>
 </manifest>
