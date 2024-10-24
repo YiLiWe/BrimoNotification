@@ -41,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                execRootCmd("pm grant com.example.brimonotification android.permission.WRITE_SECURE_SETTINGS");
+                String text = execRootCmd("pm grant com.example.brimonotification android.permission.WRITE_SECURE_SETTINGS");
+                Log.d(TAG, text);
             }
         }).start();
     }
