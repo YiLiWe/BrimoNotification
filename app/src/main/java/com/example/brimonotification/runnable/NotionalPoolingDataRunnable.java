@@ -6,9 +6,8 @@ import com.example.brimonotification.service.NotionalPoolingAccessibilityService
 import lombok.Data;
 
 //获取归集数据
-@Data
-public class NotionalPoolingDataRunnable implements Runnable {
-    private final NotionalPoolingAccessibilityService service;
+public record NotionalPoolingDataRunnable(
+        NotionalPoolingAccessibilityService service) implements Runnable {
 
     @Override
     public void run() {
@@ -18,7 +17,7 @@ public class NotionalPoolingDataRunnable implements Runnable {
             poolingBean.setBank("BRI");
             poolingBean.setPayerName("juwendi");
             poolingBean.setAmount("10000");
-            service.setPoolingBean(poolingBean);
+            service.onEntity(poolingBean);
         }
     }
 }

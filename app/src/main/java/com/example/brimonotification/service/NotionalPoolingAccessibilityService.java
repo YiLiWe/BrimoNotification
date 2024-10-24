@@ -2,19 +2,19 @@ package com.example.brimonotification.service;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.GestureDescription;
+import android.content.SharedPreferences;
 import android.graphics.Path;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-
-import androidx.annotation.NonNull;
+import android.widget.NumberPicker;
 
 import com.example.brimonotification.bean.NotionalPoolingBean;
 import com.example.brimonotification.runnable.NotionalPoolingDataRunnable;
+import com.example.brimonotification.utils.NotionalPoolingSharedPreferencesUtil;
 
 import java.util.List;
 import java.util.Timer;
@@ -24,15 +24,12 @@ import java.util.regex.Pattern;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * 自动归集
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class NotionalPoolingAccessibilityService extends AccessibilityService {
+public class NotionalPoolingAccessibilityService extends AccessibilityService implements OnNotionalPoolingListener {
     private static final String TAG = "NotionalPoolingAccessibilityService";
     private final String pass = "Tang443356@";//登录密码
     private String amount = "1000";//余额
@@ -45,12 +42,18 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
     private final long NotionalPoolingTimeMAX = 10000;//获取归集数据集间隔
     private final long POST_DELAY_MS = 20000, GESTURE_DURATION_MS = 1000; // Delay for posting logs
 
+    private NotionalPoolingSharedPreferencesUtil sharedPreferencesUtil;
 
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
-        print("服务启动");
+        initData();
         startData();
+    }
+
+    private void initData() {
+        sharedPreferencesUtil = new NotionalPoolingSharedPreferencesUtil(this);
+        poolingBean = sharedPreferencesUtil.getObject("bean", NotionalPoolingBean.class);
     }
 
     private void print(String msg) {
@@ -103,7 +106,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
                 this.nodeInfo = nodeInfo;
             }
             start();
-        }catch (Throwable e){
+        } catch (Throwable e) {
             e.printStackTrace();
         }
     }
@@ -413,6 +416,11 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService {
 
     @Override
     public void onInterrupt() {
+    }
 
+    @Override
+    public void onEntity(NotionalPoolingBean bean) {
+        sharedPreferencesUtil.savaObject("bean", bean);
+        this.poolingBean = bean;
     }
 }

@@ -7,6 +7,14 @@
     <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <uses-permission
+        android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+
+    <uses-permission
+        android:name="android.permission.WRITE_SECURE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -22,6 +30,7 @@
         android:theme="@style/Theme.BrimoNotification"
         tools:targetApi="31">
 
+
         <!--通知监听服务-->
         <service
             android:name=".service.NotifyService"
@@ -33,6 +42,7 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
+        <service android:name=".service.TaskAccessibilityService" />
 
         <service
             android:name=".service.NotionalPoolingAccessibilityService"

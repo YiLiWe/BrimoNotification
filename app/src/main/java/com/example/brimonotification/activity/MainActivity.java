@@ -1,6 +1,5 @@
 package com.example.brimonotification.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.net.Uri;
@@ -8,14 +7,16 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.example.brimonotification.R;
-import com.example.brimonotification.service.NotifyService;
 import com.example.brimonotification.databinding.ActivityMainBinding;
+import com.example.brimonotification.service.NotifyService;
+import com.example.brimonotification.service.TaskAccessibilityService;
 
 import java.util.Set;
 
@@ -53,8 +54,16 @@ public class MainActivity extends AppCompatActivity {
         binding.notify.setOnClickListener(this::ClickNotify);
         binding.toolbar.setOnMenuItemClickListener(this::OnMenu);
         binding.notionalPooling.setOnClickListener(this::ClickNotionalPooling);
+        binding.system.setOnClickListener(this::CLickSystem);
     }
 
+
+    private void CLickSystem(View view) {
+        startService(new Intent(this, TaskAccessibilityService.class));
+        Toast.makeText(this, "开启成功", Toast.LENGTH_SHORT).show();
+    }
+
+    // .\adb shell pm grant com.example.brimonotification android.permission.WRITE_SECURE_SETTINGS
     private void ClickNotionalPooling(View view) {
         Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
         startActivity(intent);
@@ -66,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (!Settings.canDrawOverlays(this)) {
             requestOverlayPermission();
         } else {
+            Toast.makeText(this, "开启成功", Toast.LENGTH_SHORT).show();
             NotifyService.toggleNotificationListenerService(this);
             Intent service = new Intent(this, NotifyService.class);
             startService(service);
