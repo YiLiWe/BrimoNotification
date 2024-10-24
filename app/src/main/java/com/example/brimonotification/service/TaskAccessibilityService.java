@@ -8,6 +8,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,12 +37,14 @@ public class TaskAccessibilityService extends Service implements Handler.Callbac
     }
 
     private void enableAccessibilityService() {
+        Log.d("测试", "运行");
         disableAccessibilityService(this);
         enableAccessibilityService(this);
         if (handler == null) return;
         handler.postDelayed(this::enableAccessibilityService, 5000);
     }
-//adb shell pm grant com.example.brimonotification android.permission.WRITE_SECURE_SETTINGS
+
+    //adb shell pm grant com.example.brimonotification android.permission.WRITE_SECURE_SETTINGS
     //开启
     public void enableAccessibilityService(Context context) {
         try {
