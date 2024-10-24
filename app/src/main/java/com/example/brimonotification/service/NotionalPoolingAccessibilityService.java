@@ -39,7 +39,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService im
     private final Handler handler = new Handler(Looper.getMainLooper());
     private AccessibilityNodeInfo nodeInfo = null;
 
-    private final long NotionalPoolingTimeMAX = 0;//获取归集数据集间隔
+    private final long NotionalPoolingTimeMAX = 1000;//获取归集数据集间隔
     private final long POST_DELAY_MS = 20000, GESTURE_DURATION_MS = 1000; // Delay for posting logs
 
     private NotionalPoolingSharedPreferencesUtil sharedPreferencesUtil;
@@ -69,12 +69,6 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService im
         } else {
             print("归集数据不为空");
         }
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                NotionalPooling();
-            }
-        }, NotionalPoolingTimeMAX);
     }
 
     private void startData() {
