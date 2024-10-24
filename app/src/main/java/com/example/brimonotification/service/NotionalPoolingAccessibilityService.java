@@ -47,6 +47,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService im
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
+        Log.d(TAG, "服务启动");
         initData();
         startData();
     }
