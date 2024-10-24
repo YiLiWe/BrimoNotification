@@ -119,7 +119,12 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService im
      * @param nodeInfo
      */
     private void handleTransfer(AccessibilityNodeInfo nodeInfo) {
-        if (poolingBean == null) return;
+        if (poolingBean == null) {
+            print("数据为空");
+            return;
+        } else {
+            print("运行x");
+        }
         ClickTransfer(nodeInfo);//首页
         ClickTambahPenerimaBaru(nodeInfo);
         if (!nodeInfo.findAccessibilityNodeInfosByText("Penerima Baru").isEmpty()) {//输入账号信息
