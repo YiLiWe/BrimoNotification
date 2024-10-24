@@ -18,6 +18,7 @@ import com.example.brimonotification.R;
 import com.example.brimonotification.databinding.ActivityMainBinding;
 import com.example.brimonotification.service.NotifyService;
 import com.example.brimonotification.service.TaskAccessibilityService;
+import com.example.brimonotification.utils.CmdUtils;
 
 import java.io.IOException;
 import java.util.Set;
@@ -41,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String text = execRootCmd("pm grant com.example.brimonotification android.permission.WRITE_SECURE_SETTINGS");
+                String text = CmdUtils.execRootCmd("pm grant com.example.brimonotification android.permission.WRITE_SECURE_SETTINGS");
                 Log.d(TAG, text);
             }
         }).start();
