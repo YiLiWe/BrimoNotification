@@ -98,9 +98,9 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService im
                 }
             }
             if (nodeInfo != null) {
-                handleLogin(this.nodeInfo);
-                handleAmount(this.nodeInfo);
-                handleTransfer(this.nodeInfo);
+                handleLogin(nodeInfo);
+                handleAmount(nodeInfo);
+                handleTransfer(nodeInfo);
             }
         } catch (Throwable e) {
             e.printStackTrace();
