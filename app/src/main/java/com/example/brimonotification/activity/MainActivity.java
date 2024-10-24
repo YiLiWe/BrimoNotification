@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -18,19 +19,50 @@ import com.example.brimonotification.databinding.ActivityMainBinding;
 import com.example.brimonotification.service.NotifyService;
 import com.example.brimonotification.service.TaskAccessibilityService;
 
+import java.io.IOException;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
+    private final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        run();
         initClick();
         initToolbar();
     }
+
+    private void run() {
+        //adb shell pm grant com.example.brimonotification android.permission.WRITE_SECURE_SETTINGS
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                execRootCmd("pm grant com.example.brimonotification android.permission.WRITE_SECURE_SETTINGS");
+            }
+        }).start();
+    }
+
+    /**
+     * 执行命令并且输出结果
+     */
+    public String execRootCmd(String cmd) {
+        String content = "";
+        try {
+            cmd = cmd.replace("adb shell", "");
+            Process process = Runtime.getRuntime().exec(cmd);
+            Log.d(TAG, "process " + process.toString());
+            content = process.toString();
+        } catch (IOException e) {
+            Log.d(TAG, "exception " + e.toString());
+            e.printStackTrace();
+        }
+        return content;
+    }
+
 
     private void initToolbar() {
         try {
