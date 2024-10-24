@@ -7,7 +7,6 @@ import com.alibaba.fastjson2.JSON;
 
 import lombok.Data;
 
-@Data
 public class NotionalPoolingSharedPreferencesUtil {
     private final String TAG = "NotionalPoolingSharedPr";
     private final Context context;
