@@ -94,7 +94,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService im
                 CharSequence sequence = event.getClassName();
                 if (sequence != null) {
                     boolean is = nodeInfo == null;
-                    Log.i(TAG, "shine:onAccessibilityEvent,className =" + sequence + "|界面信息是否为空:" + is);
+                    Log.i(TAG, "className =" + sequence + "|界面信息是否为空:" + is);
                 }
             }
             if (nodeInfo != null) {
@@ -249,6 +249,7 @@ public class NotionalPoolingAccessibilityService extends AccessibilityService im
      * @param nodeInfo
      */
     private void ClickTransfer(AccessibilityNodeInfo nodeInfo) {
+        print("获取转账点击");
         List<AccessibilityNodeInfo> transfers = nodeInfo.findAccessibilityNodeInfosByText("Transfer");
         for (AccessibilityNodeInfo transfer : transfers) {
             if (transfer.getViewIdResourceName() == null) continue;
