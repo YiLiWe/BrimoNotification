@@ -13,7 +13,7 @@ public interface BillDao {
     @Insert
     long insert(BillEntity bill);
 
-    @Query("SELECT * FROM bill LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM bill ORDER BY uid DESC LIMIT :limit OFFSET :offset ")
     List<BillEntity> queryPageVideo(int limit, int offset);
 
     @Query("SELECT * FROM bill where state=:state LIMIT :limit OFFSET :offset")
