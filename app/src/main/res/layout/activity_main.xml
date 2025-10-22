@@ -38,7 +38,7 @@
             android:id="@+id/url"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="后台地址" />
+            android:hint="后台地址:http://192.168.1.100:8080/" />
 
         <Button
             android:id="@+id/sava"
