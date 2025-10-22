@@ -163,6 +163,9 @@ public class NotifyService extends NotificationListenerService {
                 if (response.isSuccessful()) {
                     logWindow.print("新订单上传:" + billEntity.getAmount() + "成功");
                     billDao.updateStateById(id, 1);
+                }else {
+                    billDao.updateStateById(id, 0);
+                    logWindow.print("新订单上传:" + billEntity.getAmount() + "失败");
                 }
             } catch (IOException e) {
                 billDao.updateStateById(id, 0);
