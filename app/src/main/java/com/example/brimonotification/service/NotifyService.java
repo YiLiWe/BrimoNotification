@@ -83,6 +83,7 @@ public class NotifyService extends NotificationListenerService {
             Bundle bundle = sbn.getNotification().extras;
             msgContent = bundle.getString(Notification.EXTRA_TEXT, "");
         }
+        logWindow.printA("收到通知:" + msgContent);
         //消息时间
         String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINESE).format(new Date(sbn.getPostTime()));
         handleText(msgContent, time);
