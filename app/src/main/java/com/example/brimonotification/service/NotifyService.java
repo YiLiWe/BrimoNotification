@@ -62,7 +62,7 @@ public class NotifyService extends NotificationListenerService {
      */
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        Logs.printA("收到通知："+sbn.getPackageName());
+        Logs.printA("收到通知：" + sbn.getPackageName());
         if (sbn.getPackageName().equals("id.co.bri.brimo") || sbn.getPackageName().equals("com.example.brimonotification")) {
             try {
                 handleData(sbn);
@@ -252,6 +252,7 @@ public class NotifyService extends NotificationListenerService {
         }
 
         private void printA(String str) {
+            str = "\n" + str;
             // 获取当前文本
             String currentText = binding.text.getText().toString();
             String[] lines = currentText.split("\n");
@@ -276,7 +277,7 @@ public class NotifyService extends NotificationListenerService {
                     binding.text.setText(newText.toString());
                 }
                 // 追加新内容并滚动到底部
-                binding.text.append("\n" + getCurrentDate() + ": " + str);
+                binding.text.append(getCurrentDate() + ": " + str);
                 binding.scroll.post(() -> binding.scroll.fullScroll(View.FOCUS_DOWN));
             }
         }
