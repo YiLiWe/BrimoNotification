@@ -31,6 +31,8 @@ import com.example.brimonotification.R;
 import com.example.brimonotification.databinding.ActivityMainBinding;
 import com.example.brimonotification.service.NotifyService;
 import com.example.brimonotification.utils.FileUtils;
+import com.hjq.permissions.XXPermissions;
+import com.hjq.permissions.permission.PermissionLists;
 
 import java.io.File;
 import java.util.Set;
@@ -48,11 +50,27 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        initXXPermissions();
         initData();
         initClick();
         initToolbar();
         new Thread(this::initAssets).start();
     }
+
+    private void initXXPermissions() {
+        if (XXPermissions.isGrantedPermission(this, PermissionLists.getSystemAlertWindowPermission())) {
+        } else {
+            XXPermissions.with(MainActivity.this)
+                    .permission(PermissionLists.getSystemAlertWindowPermission())
+                    .request((grantedList, deniedList) -> {
+                        if (!grantedList.isEmpty()) {
+                        } else {
+                            Toast.makeText(MainActivity.this, "请授予悬浮窗权限", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+    }
+
 
     /**
      * @Description 初始化数据
