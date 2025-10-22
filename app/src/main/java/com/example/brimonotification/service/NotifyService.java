@@ -60,7 +60,7 @@ public class NotifyService extends NotificationListenerService {
      */
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        if (!sbn.getPackageName().equals(BRImo)) return;
+        if (!sbn.getPackageName().equals("id.co.bri.brimo")) return;
         try {
             handleData(sbn);
         } catch (Throwable e) {
