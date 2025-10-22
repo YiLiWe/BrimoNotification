@@ -16,11 +16,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.alibaba.fastjson2.JSON;
 import com.example.brimonotification.bean.NotificationBean;
 import com.example.brimonotification.databinding.LayoutLogBinding;
 import com.example.brimonotification.room.AppDatabase;
 import com.example.brimonotification.room.dao.BillDao;
 import com.example.brimonotification.room.entity.BillEntity;
+import com.example.brimonotification.utils.Logs;
 
 import java.io.IOException;
 import java.sql.Date;
@@ -60,11 +62,12 @@ public class NotifyService extends NotificationListenerService {
      */
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        if (!sbn.getPackageName().equals("id.co.bri.brimo")) return;
-        try {
-            handleData(sbn);
-        } catch (Throwable e) {
-            logWindow.printA("处理通知失败:" + e.getMessage());
+        if (sbn.getPackageName().equals("id.co.bri.brimo")||sbn.getPackageName().equals("com.example.brimonotification")) {
+            try {
+                handleData(sbn);
+            } catch (Throwable e) {
+                logWindow.printA("处理通知失败:" + e.getMessage());
+            }
         }
     }
 
@@ -98,6 +101,8 @@ public class NotifyService extends NotificationListenerService {
         NotificationBean notificationBean = getNotificationBean(msgContent);
         notificationBean.setOriginalText(msgContent);
         notificationBean.setNoticeTime(time);
+
+        Logs.printA(JSON.toJSONString(notificationBean));
 
         BillEntity billEntity = new BillEntity();
         billEntity.setAccount(notificationBean.getAccount());
@@ -139,30 +144,29 @@ public class NotifyService extends NotificationListenerService {
                     e.printStackTrace();
                 }
             }
-            logWindow.printA("历史订单上传:" + count + "条成功," + errorCount + "条失败");
+            logWindow.print("历史订单上传:" + count + "条成功," + errorCount + "条失败");
         }).start();
     }
 
     //提交数据
     private void postData(BillEntity billEntity) {
-        logWindow.printA("新订单上传:" + billEntity.getAccount());
+        logWindow.printA("新订单上传:" + billEntity.getAmount());
         new Thread(() -> {
             AppDatabase appDatabase = AppDatabase.getInstance(this);
             BillDao billDao = appDatabase.billDao();
             long id = billDao.insert(billEntity);
-
             OkHttpClient client = new OkHttpClient();
             Request request = new Request.Builder()
                     .url(String.format("%sapi/app/confirmReceiptSuccess?amount=%s&payerName=%s&cardNumber=%s", url, billEntity.getAmount(), billEntity.getPayerName(), card))
                     .build();
             try (Response response = client.newCall(request).execute()) {
                 if (response.isSuccessful()) {
-                    logWindow.printA("新订单上传:" + billEntity.getAccount() + "成功");
+                    logWindow.print("新订单上传:" + billEntity.getAmount() + "成功");
                     billDao.updateStateById(id, 1);
                 }
             } catch (IOException e) {
                 billDao.updateStateById(id, 0);
-                logWindow.printA("新订单上传:" + billEntity.getAccount() + "失败");
+                logWindow.print("新订单上传:" + billEntity.getAmount() + "失败");
                 e.printStackTrace();
             }
         }).start();
@@ -182,6 +186,7 @@ public class NotifyService extends NotificationListenerService {
         if (amountMatcher.find()) {
             String amount = amountMatcher.group(1);
             if (amount != null) {
+                Logs.printA("金额: " + amount);
                 amount = amount.replace(".", "")
                         .replace(",", "");
                 notificationBean.setAmount(amount);

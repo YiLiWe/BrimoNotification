@@ -31,6 +31,8 @@ import com.example.brimonotification.R;
 import com.example.brimonotification.databinding.ActivityMainBinding;
 import com.example.brimonotification.service.NotifyService;
 import com.example.brimonotification.utils.FileUtils;
+import com.example.brimonotification.utils.NotificationUtil;
+import com.example.brimonotification.utils.bean.NotificationBean;
 import com.hjq.permissions.XXPermissions;
 import com.hjq.permissions.permission.PermissionLists;
 
@@ -136,6 +138,10 @@ public class MainActivity extends AppCompatActivity {
         binding.notify.setOnClickListener(this::ClickNotify);
         binding.toolbar.setOnMenuItemClickListener(this::OnMenu);
         binding.sava.setOnClickListener(this::savaClick);
+        binding.sendNotify.setOnClickListener(v -> {
+            String text=binding.text.getText().toString();
+            NotificationUtil.getInstance(MainActivity.this).sendNotification(new NotificationBean("测试",text));
+        });
     }
 
     /**

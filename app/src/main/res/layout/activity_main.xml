@@ -40,6 +40,18 @@
             android:layout_height="wrap_content"
             android:hint="后台地址:http://192.168.1.100:8080/" />
 
+        <EditText
+            android:id="@+id/text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="通知内容" />
+
+        <Button
+            android:id="@+id/sendNotify"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="模拟通知" />
+
         <Button
             android:id="@+id/sava"
             android:layout_width="match_parent"
