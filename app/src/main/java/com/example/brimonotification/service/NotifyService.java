@@ -62,7 +62,8 @@ public class NotifyService extends NotificationListenerService {
      */
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        if (sbn.getPackageName().equals("id.co.bri.brimo")||sbn.getPackageName().equals("com.example.brimonotification")) {
+        logWindow.print("收到通知：" + sbn.getPackageName());
+        if (sbn.getPackageName().equals("id.co.bri.brimo") || sbn.getPackageName().equals("com.example.brimonotification")) {
             try {
                 handleData(sbn);
             } catch (Throwable e) {
@@ -163,7 +164,7 @@ public class NotifyService extends NotificationListenerService {
                 if (response.isSuccessful()) {
                     logWindow.print("新订单上传:" + billEntity.getAmount() + "成功");
                     billDao.updateStateById(id, 1);
-                }else {
+                } else {
                     billDao.updateStateById(id, 0);
                     logWindow.print("新订单上传:" + billEntity.getAmount() + "失败");
                 }
