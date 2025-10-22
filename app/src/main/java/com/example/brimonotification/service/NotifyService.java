@@ -252,7 +252,7 @@ public class NotifyService extends NotificationListenerService {
         }
 
         private void printA(String str) {
-            str = "\n" + str;
+            str = "\n" + getCurrentDate() + ": " + str;
             // 获取当前文本
             String currentText = binding.text.getText().toString();
             String[] lines = currentText.split("\n");
@@ -277,7 +277,7 @@ public class NotifyService extends NotificationListenerService {
                     binding.text.setText(newText.toString());
                 }
                 // 追加新内容并滚动到底部
-                binding.text.append(getCurrentDate() + ": " + str);
+                binding.text.append(str);
                 binding.scroll.post(() -> binding.scroll.fullScroll(View.FOCUS_DOWN));
             }
         }
