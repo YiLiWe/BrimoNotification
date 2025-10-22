@@ -1,77 +1,98 @@
 package com.example.brimonotification.activity;
 
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
-import com.example.brimonotification.R;
 import com.example.brimonotification.activity.adapter.BillAdapter;
-import com.example.brimonotification.bean.NotificationBean;
 import com.example.brimonotification.databinding.ActivityBillBinding;
-import com.example.brimonotification.helper.MyDBOpenHelper;
-import com.example.brimonotification.runnable.NotifyPostDataRunnable;
+import com.example.brimonotification.room.AppDatabase;
+import com.example.brimonotification.room.entity.BillEntity;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BillActivity extends AppCompatActivity  {
+/**
+ * @Description 账单界面
+ * @Author 不一样的风景
+ * @Time 2024/11/2 17:20
+ */
+public class BillActivity extends AppCompatActivity implements Runnable {
     private ActivityBillBinding binding;
     private int pageSize = 10, pageNumber = 1;
-    private final List<NotificationBean> beans = new ArrayList<>();
+    private final List<BillEntity> beans = new ArrayList<>();
     private BillAdapter adapter;
-    private MyDBOpenHelper helper;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityBillBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        helper = new MyDBOpenHelper(this);
         initRecycler();
         initToolbar();
         initSmart();
         initData();
     }
 
+    /**
+     * @Description 初始化列表
+     * @code 1
+     * @Author 不一样的风景
+     * @Time 2024/11/2 17:21
+     */
     private void initRecycler() {
-        adapter = new BillAdapter(beans, this);
+        adapter = new BillAdapter(beans);
         binding.recycler.setLayoutManager(new LinearLayoutManager(this));
         binding.recycler.setAdapter(adapter);
         binding.recycler.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
     }
 
+    /**
+     * @Description 初始化刷新
+     * @code 1
+     * @Author 不一样的风景
+     * @Time 2024/11/2 17:21
+     */
     private void initSmart() {
         binding.smart.setOnRefreshListener(this::onRefresh);
         binding.smart.setOnLoadMoreListener(this::onLoadMore);
     }
 
+    /**
+     * @Description 加载更多通知
+     * @code 1
+     * @Author 不一样的风景
+     * @Time 2024/11/2 17:21
+     */
     private void onLoadMore(RefreshLayout refreshLayout) {
         pageNumber = pageNumber + 1;
         initData();
     }
 
+    /**
+     * @Description 提交数据
+     * @code 1
+     * @Author 不一样的风景
+     * @Time 2024/11/2 17:22
+     */
     private void initData() {
-        binding.smart.finishLoadMore(0);
-        binding.smart.finishRefresh(0);
-
-        int offset = (pageNumber - 1) * pageSize;
-        JSONArray data = helper.getResults("SELECT * FROM notification  ORDER BY id DESC LIMIT ? OFFSET ?", new String[]{String.valueOf(pageSize), String.valueOf(offset)});
-        for (int i = 0; i < data.size(); i++) {
-            JSONObject object = data.getJSONObject(i);
-            beans.add(object.to(NotificationBean.class));
-            adapter.notifyItemInserted(beans.size() - 1);
-        }
+        new Thread(this).start();
     }
 
+    /**
+     * @Description 刷新数据
+     * @code 1
+     * @Author 不一样的风景
+     * @Time 2024/11/2 17:31
+     */
     private void onRefresh(RefreshLayout refreshLayout) {
         adapter.notifyItemRangeRemoved(0, beans.size() + 1);
         beans.clear();
@@ -81,48 +102,38 @@ public class BillActivity extends AppCompatActivity  {
     }
 
     /**
-     * 适配器调用该方法提交数据
-     * @param bean
+     * @Description 初始化标题栏
+     * @code 1
+     * @Author 不一样的风景
+     * @Time 2024/11/2 17:32
      */
-    public void post(NotificationBean bean) {
-        NotifyPostDataRunnable postDataRunnable = new NotifyPostDataRunnable(bean, bean.getId());
-        postDataRunnable.setOnMessage(this::onMessage);
-    }
-
-
-    private void onMessage(String msg, long id) {
-        runOnUiThread(() -> Toast.makeText(BillActivity.this, msg, Toast.LENGTH_SHORT).show());
-    }
-
-
-    /**
-     * 适配器调用删除数据
-     * @param id
-     */
-    public void delete(long id) {
-        SQLiteDatabase db = helper.getWritableDatabase();
-        db.delete("notification", "id = ?", new String[]{String.valueOf(id)});
-    }
-
     private void initToolbar() {
         binding.toolbar.setNavigationOnClickListener(v -> finish());
-        binding.toolbar.setOnMenuItemClickListener(this::OnMenu);
-    }
-
-    private boolean OnMenu(MenuItem menuItem) {
-        if (menuItem.getItemId() == R.id.delete) {
-            SQLiteDatabase db = helper.getWritableDatabase();
-            db.execSQL("DELETE FROM notification"); // 假设你的表名为 log
-            adapter.notifyItemRangeRemoved(0, beans.size() + 1);
-            beans.clear();
-        }
-        return true;
+        binding.toolbar.setOnMenuItemClickListener(item -> {
+            new AlertDialog.Builder(this).setTitle("提示").setMessage("是否清空账单").setNegativeButton("取消", null).setPositiveButton("确定", (dialog, which) -> {
+                new Thread(() -> {
+                    AppDatabase helper = AppDatabase.getInstance(BillActivity.this);
+                    helper.billDao().deleteAll();
+                });
+                Toast.makeText(BillActivity.this, "已清空", Toast.LENGTH_SHORT).show();
+            });
+            return false;
+        });
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        helper.close();
+    public void run() {
+        int offset = (pageNumber - 1) * pageSize;
+        AppDatabase helper = AppDatabase.getInstance(this);
+        List<BillEntity> billEntities = helper.billDao().queryPageVideo(pageSize, offset);
+        runOnUiThread(() -> {
+            binding.smart.finishLoadMore(0);
+            binding.smart.finishRefresh(0);
+            if (billEntities.isEmpty()) {
+                binding.smart.setEnableLoadMore(false);
+            }
+            beans.addAll(billEntities);
+            adapter.notifyItemRangeChanged(0, beans.size() - 1);
+        });
     }
-
 }

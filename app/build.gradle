@@ -10,8 +10,8 @@ android {
         applicationId "com.example.brimonotification"
         minSdk 26
         targetSdk 34
-        versionCode 6
-        versionName "1.7"
+        versionCode 8
+        versionName "1.9"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -34,10 +34,10 @@ android {
 }
 
 dependencies {
-    implementation project(':FloatWindow')
+    implementation("androidx.room:room-runtime:2.6.1")
+    annotationProcessor "androidx.room:room-compiler:2.6.1"
 
-    compileOnly(libs.de.robv.android.xposed.api)
-
+    //implementation libs.tesseract4android.openmp
     implementation libs.refresh.layout.kernel      //核心必须依赖
     implementation libs.refresh.header.classics    //经典刷新头
     implementation libs.refresh.footer.classics    //经典加载

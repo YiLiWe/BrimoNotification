@@ -2,44 +2,55 @@ package com.example.brimonotification.service;
 
 import android.app.Notification;
 import android.content.ComponentName;
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.pm.PackageManager;
+import android.content.SharedPreferences;
+import android.graphics.PixelFormat;
 import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
-import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-
-import androidx.annotation.NonNull;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.WindowManager;
 
 import com.example.brimonotification.bean.NotificationBean;
-import com.example.brimonotification.helper.MyDBOpenHelper;
-import com.example.brimonotification.runnable.NotifyPostDataRunnable;
-import com.example.brimonotification.window.NotifyWindow;
+import com.example.brimonotification.databinding.LayoutLogBinding;
+import com.example.brimonotification.room.AppDatabase;
+import com.example.brimonotification.room.dao.BillDao;
+import com.example.brimonotification.room.entity.BillEntity;
 
+import java.io.IOException;
 import java.sql.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class NotifyService extends NotificationListenerService implements Handler.Callback {
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+/**
+ * @Description 监听通知服务
+ * @Author 不一样的风景
+ * @Time 2024/11/2 17:13
+ */
+public class NotifyService extends NotificationListenerService {
     public final String TAG = "NotifyService";
     private final String BRImo = "id.co.bri.brimo";//银行
-    private MyDBOpenHelper helper;
-    private final Handler handler = new Handler(Looper.getMainLooper(), this);
+    private String url, card;
+    private NotifyService.LogWindow logWindow;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        helper = new MyDBOpenHelper(this);
-        if (Settings.canDrawOverlays(this)) {
-            NotifyWindow.getNotifyWindow(this).start();
-            appText("服务开启成功");
-        }
+        logWindow = new LogWindow(this);
+        SharedPreferences sharedPreferences = getSharedPreferences("DATA", Context.MODE_PRIVATE);
+        url = sharedPreferences.getString("url", "");
+        card = sharedPreferences.getString("card", "");
     }
 
     /**
@@ -50,7 +61,17 @@ public class NotifyService extends NotificationListenerService implements Handle
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         if (!sbn.getPackageName().equals(BRImo)) return;
-        handleData(sbn);
+        try {
+            handleData(sbn);
+        } catch (Throwable e) {
+            logWindow.printA("处理通知失败:" + e.getMessage());
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        logWindow.destroy();
     }
 
     public void handleData(StatusBarNotification sbn) {
@@ -67,49 +88,83 @@ public class NotifyService extends NotificationListenerService implements Handle
         handleText(msgContent, time);
     }
 
-    public void appText(String msg) {
-        if (Settings.canDrawOverlays(this)) {
-            NotifyWindow.getNotifyWindow(this).appText(msg + "\n");
-        }
-    }
 
     private void handleText(String msgContent, String time) {
         if (msgContent.isEmpty()) {
-            appText("内容为空");
             return;
         }
         if (!msgContent.startsWith("Sobat BRI!")) return;
         NotificationBean notificationBean = getNotificationBean(msgContent);
-        appText("\n");
         notificationBean.setOriginalText(msgContent);
         notificationBean.setNoticeTime(time);
-        ContentValues values = new ContentValues();
-        values.put("amount", notificationBean.getAmount());
-        values.put("payerName", notificationBean.getPayerName());
-        values.put("account", notificationBean.getAccount());
-        values.put("noticeTime", notificationBean.getNoticeTime());
-        values.put("originalText", notificationBean.getOriginalText());
-        values.put("time", notificationBean.getTime());
 
-        if (helper.isEmpty("SELECT * FROM notification WHERE originalText=?",
-                new String[]{notificationBean.getOriginalText()})) {
-            long id = helper.instData("notification", values);
-            NotifyPostDataRunnable postDataRunnable = new NotifyPostDataRunnable(notificationBean, id);
-            postDataRunnable.setOnMessage(this::onMessage);
-            new Thread(postDataRunnable).start();
-        }
+        BillEntity billEntity = new BillEntity();
+        billEntity.setAccount(notificationBean.getAccount());
+        billEntity.setAmount(notificationBean.getAmount());
+        billEntity.setPayerName(notificationBean.getPayerName());
+        billEntity.setTime(notificationBean.getTime());
+        billEntity.setNoticeTime(notificationBean.getNoticeTime());
+        billEntity.setMsgContent(notificationBean.getOriginalText());
+        billEntity.setState(2);
+        billEntity.setTime(time);
+
+        postData(billEntity);
+        postDataAll();
     }
 
-    private void onMessage(String msg, long id) {
-        if (id == -1) {
-            Message message = new Message();
-            message.obj = "上传失败";
-            handler.sendMessage(message);
-        } else {//记录
-            ContentValues values = new ContentValues();
-            values.put("state", 1);
-            helper.update("notification", values, "id=?", new String[]{String.valueOf(id)});
-        }
+
+    //上传历史未成功的订单
+    private void postDataAll() {
+        new Thread(() -> {
+            AppDatabase appDatabase = AppDatabase.getInstance(NotifyService.this);
+            BillDao billDao = appDatabase.billDao();
+            List<BillEntity> billEntities = billDao.queryByState(10, 0, 0);
+            int count = 0;
+            int errorCount = 0;
+            for (BillEntity billEntity : billEntities) {
+                billDao.updateStateById(billEntity.getUid(), 2);
+                OkHttpClient client = new OkHttpClient();
+                Request request = new Request.Builder()
+                        .url(String.format("%sapi/app/confirmReceiptSuccess?amount=%s&payerName=%s&cardNumber=%s", url, billEntity.getAmount(), billEntity.getPayerName(), card))
+                        .build();
+                try (Response response = client.newCall(request).execute()) {
+                    if (response.isSuccessful()) {
+                        billDao.updateStateById(billEntity.getUid(), 1);
+                        count++;
+                    }
+                } catch (IOException e) {
+                    errorCount++;
+                    billDao.updateStateById(billEntity.getUid(), 0);
+                    e.printStackTrace();
+                }
+            }
+            logWindow.printA("历史订单上传:" + count + "条成功," + errorCount + "条失败");
+        }).start();
+    }
+
+    //提交数据
+    private void postData(BillEntity billEntity) {
+        logWindow.printA("新订单上传:" + billEntity.getAccount());
+        new Thread(() -> {
+            AppDatabase appDatabase = AppDatabase.getInstance(this);
+            BillDao billDao = appDatabase.billDao();
+            long id = billDao.insert(billEntity);
+
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder()
+                    .url(String.format("%sapi/app/confirmReceiptSuccess?amount=%s&payerName=%s&cardNumber=%s", url, billEntity.getAmount(), billEntity.getPayerName(), card))
+                    .build();
+            try (Response response = client.newCall(request).execute()) {
+                if (response.isSuccessful()) {
+                    logWindow.printA("新订单上传:" + billEntity.getAccount() + "成功");
+                    billDao.updateStateById(id, 1);
+                }
+            } catch (IOException e) {
+                billDao.updateStateById(id, 0);
+                logWindow.printA("新订单上传:" + billEntity.getAccount() + "失败");
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     private NotificationBean getNotificationBean(String input) {
@@ -118,7 +173,7 @@ public class NotifyService extends NotificationListenerService implements Handle
         String amountRegex = "Rp([\\d,.]+)";
         String accountRegex = "rekening (\\d+)";
         String dateTimeRegex = "(\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}:\\d{2})";
-        String nameRegex = "NBMB ([A-Za-z ]+) TO";
+        String nameRegex = "(?<=KET\\.:)(.*)";
 
         // 提取金额
         Pattern amountPattern = Pattern.compile(amountRegex);
@@ -129,7 +184,6 @@ public class NotifyService extends NotificationListenerService implements Handle
                 amount = amount.replace(".", "")
                         .replace(",", "");
                 notificationBean.setAmount(amount);
-                appText("金额: " + amount);
             }
         }
 
@@ -139,7 +193,6 @@ public class NotifyService extends NotificationListenerService implements Handle
         if (accountMatcher.find()) {
             String account = accountMatcher.group(1);
             notificationBean.setAccount(account);
-            appText("银行账户: " + account);
         }
 
         // 提取日期和时间
@@ -148,17 +201,17 @@ public class NotifyService extends NotificationListenerService implements Handle
         if (dateTimeMatcher.find()) {
             String dateTime = dateTimeMatcher.group(1);
             notificationBean.setTime(dateTime);
-            appText("收款时间: " + dateTime);
         }
 
+        notificationBean.setPayerName(input);
         // 提取名字
-        Pattern namePattern = Pattern.compile(nameRegex);
+        /*Pattern namePattern = Pattern.compile(nameRegex);
         Matcher nameMatcher = namePattern.matcher(input);
         if (nameMatcher.find()) {
             String name = nameMatcher.group(1);
             notificationBean.setPayerName(name);
             appText("名字: " + name);
-        }
+        }*/
         return notificationBean;
     }
 
@@ -167,37 +220,84 @@ public class NotifyService extends NotificationListenerService implements Handle
      */
     @Override
     public void onListenerDisconnected() {
-        appText("服务重启");
         // 通知侦听器断开连接 - 请求重新绑定
         requestRebind(new ComponentName(this, NotificationListenerService.class));
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        helper.close();
-        if (Settings.canDrawOverlays(this)) {
-            NotifyWindow.getNotifyWindow(this).onDestroy();
+
+    public static class LogWindow {
+        private final Handler handler = new Handler(Looper.getMainLooper());
+        private final NotifyService service;
+        private final LayoutLogBinding binding;
+        private WindowManager windowManager;
+
+        public LogWindow(NotifyService service) {
+            this.service = service;
+            this.binding = LayoutLogBinding.inflate(LayoutInflater.from(service));
+            init();
+        }
+
+        public void print(String str) {
+            handler.post(() -> printA(str));
+        }
+
+        private void printA(String str) {
+            // 获取当前文本
+            String currentText = binding.text.getText().toString();
+            String[] lines = currentText.split("\n");
+
+            // 检查最新内容是否已经存在
+            boolean isDuplicate = false;
+            for (String line : lines) {
+                if (line.equals(str)) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+            // 如果内容不存在，才追加
+            if (!isDuplicate) {
+                // 如果行数超过 20，移除最早的行
+                if (lines.length >= 10) {
+                    StringBuilder newText = new StringBuilder();
+                    // 保留最后 19 行
+                    for (int i = lines.length - 9; i < lines.length; i++) {
+                        newText.append(lines[i]);
+                    }
+                    binding.text.setText(newText.toString());
+                }
+                // 追加新内容并滚动到底部
+                binding.text.append("\n" + getCurrentDate() + ": " + str);
+                binding.scroll.post(() -> binding.scroll.fullScroll(View.FOCUS_DOWN));
+            }
+        }
+
+        public static String getCurrentDate() {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MM-dd-ss", Locale.getDefault());
+            return sdf.format(new java.util.Date());
+        }
+
+        private void init() {
+            WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                    dpToPx(service, 300),
+                    dpToPx(service, 100),
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |  // 关键：悬浮窗不获取焦点
+                            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, // 关键：悬浮窗不可触摸（穿透点击）
+                    PixelFormat.TRANSLUCENT
+            );
+            params.gravity = Gravity.TOP | Gravity.END;
+            windowManager = (WindowManager) service.getSystemService(Context.WINDOW_SERVICE);
+            windowManager.addView(binding.getRoot(), params);
+        }
+
+        public void destroy() {
+            windowManager.removeView(binding.getRoot());
+        }
+
+        public int dpToPx(Context context, float dp) {
+            float density = context.getResources().getDisplayMetrics().density;
+            return (int) (dp * density + 0.5f); // 四舍五入
         }
     }
 
-    /**
-     * @param context 反正第二次启动失败
-     */
-    public static void toggleNotificationListenerService(Context context) {
-        PackageManager pm = context.getPackageManager();
-        pm.setComponentEnabledSetting(new ComponentName(context, NotifyService.class),
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-
-        pm.setComponentEnabledSetting(new ComponentName(context, NotifyService.class),
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
-    }
-
-    @Override
-    public boolean handleMessage(@NonNull Message msg) {
-        if (msg.what == 0 && msg.obj instanceof String text) {
-            appText(text);
-        }
-        return false;
-    }
 }

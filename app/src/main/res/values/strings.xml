@@ -1,5 +1,4 @@
 <resources>
     <string name="app_name">BrimoNotification</string>
-    <string name="accessibility_service_description">监听</string>
-    <string name="accessibility_service_label">监听</string>
+    <string name="accessibility_service_description">录屏配合OCR识别，无障碍进行模拟点击滑动</string>
 </resources>
